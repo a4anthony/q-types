@@ -1,6 +1,6 @@
 {
   "name": "q-types",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "private": true,
   "main": "dist/q-types.umd.js",
   "browser": "dist/q-types.browser.js",
