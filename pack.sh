@@ -10,8 +10,8 @@ npm run tailwind
 
 npm pack
 
-cp q-types-0.1.0.tgz ~/vue/test/
+cp q-types-module-1.0.1.tgz ~/vue/test/
 
 cd ~/vue/test/
 
-npm i q-types-0.1.0.tgz
+npm i q-types-module-1.0.1.tgz
