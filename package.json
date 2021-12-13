@@ -1,6 +1,6 @@
 {
   "name": "q-types-module",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "main": "dist/q-types-module.umd.js",
   "browser": "dist/q-types-module.browser.js",
   "module": "dist/q-types-module.esm-bundler.js",
