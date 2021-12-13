@@ -1,16 +1,16 @@
 <template>
   <div
-    class="block sm:hidden mt-12 bg-gray-100 scrollbar-thin scrollbar-thumb-blue-700 scrollbar-track-blue-300 overflow-x-scroll scrollbar-thumb-rounded-full scrollbar-track-rounded-full"
+    class="qt-block sm:qt-hidden qt-mt-12 qt-bg-gray-100 qt-scrollbar-thin qt-scrollbar-thumb-blue-700 qt-scrollbar-track-blue-300 qt-overflow-x-scroll qt-scrollbar-thumb-rounded-full qt-scrollbar-track-rounded-full"
   >
     <div
-      class="h-17 shadow-sm w-full flex justify-start items-center space-x-2 mx-2"
+      class="qt-h-17 qt-shadow-sm qt-w-full qt-flex qt-justify-start qt-items-center qt-space-x-2 qt-mx-2"
     >
       <span
         :draggable="true"
         @dragstart="startDrag($event, index)"
         :ref="`option${index}RefSm`"
         :class="bgColor"
-        class="inline-block text-sm text-white rounded-lg px-4 py-0.5 cursor-move font-medium"
+        class="qt-inline-block qt-text-sm qt-text-white qt-rounded-lg qt-px-4 qt-py-0.5 qt-cursor-move qt-font-medium"
         v-for="(option, index) in options"
         :key="`option${index}`"
         @click="setAnswer(index)"
@@ -20,14 +20,14 @@
     </div>
   </div>
   <div
-    class="hidden sm:flex flex-wrap pb-2 mt-12 justify-center bg-gray-100 shadow-sm px-2"
+    class="qt-hidden sm:qt-flex qt-flex-wrap qt-pb-2 qt-mt-12 qt-justify-center qt-bg-gray-100 qt-shadow-sm qt-px-2"
   >
     <span
       :draggable="true"
       @dragstart="startDrag($event, index)"
       :ref="`option${index}Ref`"
       :class="bgColor"
-      class="inline-block mt-2 mr-2 text-sm text-white rounded-lg px-4 py-1 cursor-move font-medium"
+      class="qt-inline-block qt-mt-2 qt-mr-2 qt-text-sm qt-text-white qt-rounded-lg qt-px-4 qt-py-1 qt-cursor-move qt-font-medium"
       v-for="(option, index) in options"
       :key="`option${index}`"
       @click="setAnswer(index)"

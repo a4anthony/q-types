@@ -1,7 +1,7 @@
 <template>
   <div>
     <div
-      class="leading-loose relative space-x-2 justify-start text-left text-base font-medium"
+      class="qt-leading-loose qt-relative qt-space-x-2 qt-justify-start qt-text-left qt-text-base qt-font-medium"
     >
       <span v-html="htmlText"></span>
     </div>
@@ -25,7 +25,7 @@ export default {
   props: {
     bgColor: {
       type: String,
-      default: "bg-blue-600",
+      default: "qt-bg-blue-600",
     },
     qId: {
       type: String,
@@ -68,17 +68,17 @@ export default {
     const space =
       "<span" +
       " style='top: -.5rem'" +
-      " class='drag-over-element text-blue-400 relative inline-block border-gray-400'" +
+      " class='drag-over-element qt-text-blue-400 qt-relative qt-inline-block qt-border-gray-400'" +
       ">" +
       "<span " +
-      " class='drag-over-element-blank-text bg-transparent text-sm text-transparent px-2 cursor-move'>" +
+      " class='drag-over-element-blank-text qt-bg-transparent qt-text-sm qt-text-transparent qt-px-2 qt-cursor-move'>" +
       "blank_space" +
       "</span>" +
       "<span" +
       "" +
       " class='drag-over-element-answer " +
       props.bgColor +
-      " text-sm text-center text-white rounded-lg px-2 cursor-move absolute bottom-0.5'" +
+      " qt-text-sm qt-text-center qt-text-white qt-rounded-lg qt-px-2 qt-cursor-move qt-absolute qt-bottom-0.5'" +
       " style='" +
       " left: 0;\n" +
       " right: 0;\n" +
@@ -133,13 +133,13 @@ export default {
               if (
                 e.target.parentElement.classList.contains("drag-over-element")
               ) {
-                e.target.parentElement.classList.add("bg-green-100");
+                e.target.parentElement.classList.add("qt-bg-green-100");
                 ["Top", "Right", "Left", "Bottom"].forEach((pos) => {
                   e.target.parentElement.style[`border${pos}Color`] = "green";
                 });
                 overElm.value = e.target.parentElement;
               } else if (overElm.value) {
-                overElm.value.classList.remove("bg-green-100");
+                overElm.value.classList.remove("qt-bg-green-100");
                 ["Top", "Right", "Left", "Bottom"].forEach((pos) => {
                   overElm.value.style[`border${pos}Color`] = "#9CA3AF";
                 });
@@ -155,7 +155,7 @@ export default {
                 mcOptions.value.onDrop(e, index);
               }
               if (overElm.value) {
-                overElm.value.classList.remove("bg-green-100");
+                overElm.value.classList.remove("qt-bg-green-100");
                 ["Top", "Right", "Left", "Bottom"].forEach((pos) => {
                   overElm.value.style[`border${pos}Color`] = "#9CA3AF";
                 });
@@ -194,9 +194,11 @@ export default {
       // show option in dock
       props.options.forEach((answer, index) => {
         if (value === answer.content) {
-          mcOptions.value.$refs[`option${index}Ref`].classList.remove("hidden");
+          mcOptions.value.$refs[`option${index}Ref`].classList.remove(
+            "qt-hidden"
+          );
           mcOptions.value.$refs[`option${index}RefSm`].classList.remove(
-            "hidden"
+            "qt-hidden"
           );
         }
       });
@@ -240,10 +242,10 @@ export default {
           }
           valueAlreadyAssigned = true;
           mcOptions.value.$refs[`option${answerIndex}Ref`].classList.add(
-            "hidden"
+            "qt-hidden"
           );
           mcOptions.value.$refs[`option${answerIndex}RefSm`].classList.add(
-            "hidden"
+            "qt-hidden"
           );
         }
 
@@ -252,10 +254,10 @@ export default {
             removeAnswer(selectedAnswers.value[0], false);
             selectedAnswers.value[index] = value;
             mcOptions.value.$refs[`option${answerIndex}Ref`].classList.add(
-              "hidden"
+              "qt-hidden"
             );
             mcOptions.value.$refs[`option${answerIndex}RefSm`].classList.add(
-              "hidden"
+              "qt-hidden"
             );
             reset = true;
           }

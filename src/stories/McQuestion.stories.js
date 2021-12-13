@@ -15,7 +15,7 @@ const Template = (args) => ({
   },
   // And then the `args` are bound to your component with `v-bind="args"`
   template:
-    '<div class="max-w-sm mx-auto mt-8"><mc-question  v-bind="args"  /></div>',
+    '<div class="qt-max-w-sm qt-mx-auto qt-mt-8"><mc-question  v-bind="args"  /></div>',
 });
 
 export const Primary = Template.bind({});
