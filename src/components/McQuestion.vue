@@ -5,13 +5,15 @@
     >
       <span v-html="htmlText"></span>
     </div>
-    <mc-options
-      ref="mcOptions"
-      @set-answer="setAnswer"
-      :options="options"
-      :bg-color="bgColor"
-      @reset-border="defaultBorder"
-    />
+    <div :class="stickyBottom ? `sticky bottom-0` : ''">
+      <mc-options
+        ref="mcOptions"
+        @set-answer="setAnswer"
+        :options="options"
+        :bg-color="bgColor"
+        @reset-border="defaultBorder"
+      />
+    </div>
   </div>
 </template>
 
@@ -34,6 +36,10 @@ export default {
     spaceSelector: {
       type: String,
       default: "#SELECT#",
+    },
+    stickyBottom: {
+      type: Boolean,
+      default: false,
     },
     question: {
       type: String,
