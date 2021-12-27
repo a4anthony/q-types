@@ -1,0 +1,40 @@
+@layer components {
+  .qt-btn-xs {
+    @apply qt-px-2.5 qt-py-1.5 qt-text-xs;
+  }
+  .qt-btn-sm {
+    @apply qt-px-3 qt-py-2 qt-text-sm;
+  }
+  .qt-btn-md {
+    @apply qt-px-3.5 qt-py-1.5 qt-text-sm;
+  }
+  .qt-btn-lg {
+    @apply qt-px-4 qt-py-2 qt-text-base;
+  }
+  .qt-btn-xl {
+    @apply qt-px-6 qt-py-3 qt-text-base;
+  }
+  .qt-btn {
+    @apply qt-text-gray-100  qt-inline-flex qt-items-center qt-justify-center qt-items-center qt-border qt-border-transparent qt-leading-4 qt-rounded qt-shadow-sm focus:qt-outline-none
+    qt-font-medium;
+  }
+  .qt-btn-indigo {
+    @apply qt-text-gray-100 qt-bg-indigo-600 hover:qt-bg-indigo-700;
+  }
+  .qt-btn-gray {
+    @apply qt-text-gray-100 qt-bg-gray-500 hover:qt-bg-gray-600;
+  }
+  .qt-btn-dark-gray {
+    @apply qt-text-gray-50 qt-bg-gray-500 hover:qt-bg-gray-400;
+  }
+  .qt-btn-white {
+    @apply qt-text-gray-700  qt-bg-white hover:qt-bg-gray-50 qt-border-gray-300;
+  }
+  .qt-btn-red {
+    @apply qt-text-gray-100 qt-bg-red-600 hover:qt-bg-red-700;
+  }
+  button:disabled,
+  button[disabled] {
+    @apply qt-bg-opacity-75   qt-cursor-not-allowed;
+  }
+}

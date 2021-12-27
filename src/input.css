@@ -1,3 +1,118 @@
+@import url("https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap");
 @tailwind base;
 @tailwind components;
+
 @tailwind utilities;
+
+@layer components {
+  .qt-min-h-half {
+    min-height: 25vh;
+  }
+  .qt-audio-question-content img {
+    @apply qt-mx-auto qt-w-full sm:qt-w-2/5 qt-bg-gray-200 qt-min-h-half;
+  }
+  #qtAudioRadioQuestionRatioContent img {
+    @apply qt-mx-auto;
+  }
+  .qt-link {
+    @apply qt-text-blue-500 hover:qt-text-blue-400;
+  }
+}
+
+@layer components {
+  .qt-btn-xs {
+    @apply qt-px-2.5 qt-py-1.5 qt-text-xs;
+  }
+  .qt-btn-sm {
+    @apply qt-px-3 qt-py-2 qt-text-sm;
+  }
+  .qt-btn-md {
+    @apply qt-px-3.5 qt-py-1.5 qt-text-sm;
+  }
+  .qt-btn-lg {
+    @apply qt-px-4 qt-py-2 qt-text-base;
+  }
+  .qt-btn-xl {
+    @apply qt-px-6 qt-py-3 qt-text-base;
+  }
+  .qt-btn {
+    @apply qt-text-gray-100  qt-inline-flex qt-items-center qt-justify-center qt-items-center qt-border qt-border-transparent qt-leading-4 qt-rounded qt-shadow-sm focus:qt-outline-none
+    qt-font-medium;
+  }
+  .qt-btn-indigo {
+    @apply qt-text-gray-100 qt-bg-indigo-600 hover:qt-bg-indigo-700;
+  }
+  .qt-btn-gray {
+    @apply qt-text-gray-100 qt-bg-gray-500 hover:qt-bg-gray-600;
+  }
+  .qt-btn-dark-gray {
+    @apply qt-text-gray-50 qt-bg-gray-500 hover:qt-bg-gray-400;
+  }
+  .qt-btn-white {
+    @apply qt-text-gray-700  qt-bg-white hover:qt-bg-gray-50 qt-border-gray-300;
+  }
+  .qt-btn-red {
+    @apply qt-text-gray-100 qt-bg-red-600 hover:qt-bg-red-700;
+  }
+  button:disabled,
+  button[disabled] {
+    @apply qt-bg-opacity-75   qt-cursor-not-allowed;
+  }
+}
+
+#qt-bars {
+  height: 30px;
+  left: 0%;
+  position: relative;
+  top: 50%;
+  width: 30px;
+}
+
+.qt-bar {
+  bottom: 1px;
+  height: 5px;
+  position: absolute;
+  width: 5px;
+}
+.qt-animate-bar {
+  bottom: 1px;
+  height: 5px;
+  position: absolute;
+  width: 5px;
+  animation: qt-sound 0ms -800ms linear infinite alternate;
+}
+@keyframes qt-sound {
+  0% {
+    opacity: 0.55;
+    height: 5%;
+  }
+
+  100% {
+    opacity: 1;
+    height: 16px;
+  }
+}
+
+.qt-bar:nth-child(1),
+.qt-animate-bar:nth-child(1) {
+  left: 1px;
+  animation-duration: 474ms;
+}
+
+.qt-bar:nth-child(2),
+.qt-animate-bar:nth-child(2) {
+  left: 7px;
+  animation-duration: 433ms;
+}
+
+.qt-bar:nth-child(3),
+.qt-animate-bar:nth-child(3) {
+  left: 13px;
+  animation-duration: 407ms;
+}
+
+.qt-bar:nth-child(4),
+.qt-animate-bar:nth-child(4) {
+  left: 19px;
+  animation-duration: 458ms;
+}

@@ -1,18 +1,23 @@
 <template>
-  <div>
-    <div
-      class="qt-leading-loose qt-relative qt-space-x-2 qt-justify-start qt-text-left qt-text-base qt-font-medium"
-    >
-      <span v-html="htmlText"></span>
-    </div>
-    <div :class="stickyBottom ? `sticky bottom-0` : ''">
-      <mc-options
-        ref="mcOptions"
-        @set-answer="setAnswer"
-        :options="options"
-        :bg-color="bgColor"
-        @reset-border="defaultBorder"
-      />
+  <div
+    class="qt-h-full qt-flex qt-items-center qt-w-full sm:qt-w-auto qt-justify-center qt-mx-auto"
+  >
+    <div class="qt-w-full sm:qt-w-auto">
+      <h1 class="qt-hidden">{{ counter }}</h1>
+      <div
+        class="qt-leading-loose qt-relative qt-space-x-2 qt-justify-start qt-text-left qt-text-base qt-font-medium"
+      >
+        <span v-html="htmlText"></span>
+      </div>
+      <div :class="stickyBottom ? `sticky bottom-0` : ''">
+        <mc-options
+          ref="mcOptions"
+          @set-answer="setAnswer"
+          :options="options"
+          :bg-color="bgColor"
+          @reset-border="defaultBorder"
+        />
+      </div>
     </div>
   </div>
 </template>
@@ -20,11 +25,16 @@
 <script>
 import { onMounted, reactive, ref, watch } from "vue";
 import McOptions from "./helpers/McOptions.vue";
+import _ from "lodash";
 
 export default {
   name: "McQuestion",
   components: { McOptions },
   props: {
+    fullQuestion: {
+      type: Boolean,
+      default: true,
+    },
     bgColor: {
       type: String,
       default: "qt-bg-blue-600",
@@ -41,48 +51,81 @@ export default {
       type: Boolean,
       default: false,
     },
-    question: {
-      type: String,
-      default: "My favourite colors are #SELECT#, #SELECT# and #SELECT#.",
+    currentQuestion: {
+      type: Object,
+      required: true,
     },
+    currentSection: {
+      type: Object,
+      required: true,
+    },
+
     options: {
       type: Array,
-      default: () => [
-        { id: 549, question_id: 138, content: "blue" },
-        {
-          id: 550,
-          question_id: 138,
-          content: "green",
-        },
-        { id: 551, question_id: 138, content: "yellow" },
-        { id: 552, question_id: 138, content: "purple" },
-        { id: 552, question_id: 138, content: "brown" },
-        { id: 552, question_id: 138, content: "orange" },
-      ],
+      required: true,
     },
   },
 
-  emits: ["click", "comp-mounted", "ready", "answer"],
+  emits: [
+    "click",
+    "comp-mounted",
+    "start-time",
+    "answer",
+    "answered",
+    "reset-answer",
+  ],
   setup(props, { emit }) {
     props = reactive(props); // mounted
     const blankSpaces = ref(0);
+    const counter = ref(0);
     const htmlText = ref(null);
     let selectedAnswers = ref([]);
     const mcOptions = ref(null);
     const overElm = ref(null);
 
+    watch(blankSpaces, (currentValue) => {
+      let sampleAnswers = [];
+      for (let i = 1; i <= currentValue; i++) {
+        sampleAnswers.push(null);
+      }
+      selectedAnswers.value = sampleAnswers;
+    });
+
+    watch(
+      () => _.cloneDeep(selectedAnswers.value),
+      (currentValue) => {
+        if (currentValue.filter((x) => x === null).length < blankSpaces.value) {
+          let answers = [];
+          currentValue.forEach((v) => {
+            if (props.options.find((x) => x.content === v)) {
+              answers.push(props.options.find((x) => x.content === v).id);
+            } else {
+              answers.push("");
+            }
+          });
+          emit("answered", {
+            answer: answers,
+            question_id: props.currentQuestion.id,
+            section_id: props.currentSection.id,
+          });
+        } else {
+          emit("reset-answer");
+        }
+      }
+    );
+
     const space =
       "<span" +
       " style='top: -.5rem'" +
-      " class='drag-over-element qt-text-blue-400 qt-relative qt-inline-block qt-border-gray-400'" +
+      " class='drag-over-element qt-cursor-pointer qt-text-blue-400 qt-relative qt-inline-block qt-border-gray-400'" +
       ">" +
       "<span " +
-      " class='drag-over-element-blank-text qt-bg-transparent qt-text-sm qt-text-transparent qt-px-2 qt-cursor-move'>" +
+      " class='qt-pointer-events-none drag-over-element-blank-text qt-bg-transparent qt-text-sm qt-text-transparent qt-px-2 qt-cursor-move'>" +
       "blank_space" +
       "</span>" +
       "<span" +
       "" +
-      " class='drag-over-element-answer " +
+      " class='drag-over-element-answer qt-pointer-events-none " +
       props.bgColor +
       " qt-text-sm qt-text-center qt-text-white qt-rounded-lg qt-px-2 qt-cursor-move qt-absolute qt-bottom-0.5'" +
       " style='" +
@@ -95,24 +138,19 @@ export default {
     onMounted(() => {
       initialMount();
     });
-    watch(blankSpaces, (currentValue) => {
-      let sampleAnswers = [];
-      for (let i = 1; i <= currentValue; i++) {
-        sampleAnswers.push(null);
-      }
-      selectedAnswers.value = sampleAnswers;
-      // console.log("blankSpaces changed", blankSpaces.value);
-    });
 
     const initialMount = () => {
       emit("comp-mounted");
-      blankSpaces.value = props.question.split(props.spaceSelector).length - 1;
-      htmlText.value = props.question.replace(/#SELECT#/g, space);
+      blankSpaces.value =
+        props.currentQuestion.content.split(props.spaceSelector).length - 1;
+      htmlText.value = props.currentQuestion.content.replace(
+        /#SELECT#/g,
+        space
+      );
 
       setTimeout(() => {
         const spaces = document.getElementsByClassName("drag-over-element");
         for (let i = 0; i < spaces.length; i++) {
-          // console.log(spaces[i]);
           spaces[i].id = `${props.qId}${i + 1}`;
           const answerBlankText = document.querySelector(
             `#${props.qId}${i + 1} .drag-over-element-blank-text`
@@ -122,41 +160,55 @@ export default {
           );
           answerBlankText.id = `${props.qId}BlankText${i + 1}`;
           answerElm.id = `${props.qId}Answer${i + 1}`;
-          answerElm.addEventListener("click", (e) => {
+          // remove answer on click
+          spaces[i].addEventListener("click", (e) => {
             e.preventDefault();
-            removeAnswer(e.target.innerHTML);
-            e.target.innerHTML = "";
+            if (answerElm.innerHTML) {
+              removeAnswer(answerElm.innerHTML);
+              answerElm.innerHTML = "";
+            }
           });
-
+          // drag events
           [answerElm, spaces[i]].forEach((elm) => {
+            // on dragover
             elm.addEventListener("dragover", (e) => {
               e.preventDefault();
             });
+            // on dragleave
             elm.addEventListener("dragleave", (e) => {
-              e.preventDefault();
+              if (counter.value - 1 >= 0) {
+                counter.value--;
+              }
+              if (counter.value === 0) {
+                e.target.classList.remove("qt-bg-green-100");
+                ["Top", "Right", "Left", "Bottom"].forEach((pos) => {
+                  e.target.style[`border${pos}Color`] = "#9CA3AF";
+                });
+              }
             });
             elm.addEventListener("dragenter", (e) => {
-              if (
-                e.target.parentElement.classList.contains("drag-over-element")
-              ) {
-                e.target.parentElement.classList.add("qt-bg-green-100");
+              setTimeout(() => {
+                if (counter.value + 1 < 2) {
+                  counter.value++;
+                }
+              }, 200);
+              if (e.target.classList.contains("drag-over-element")) {
+                e.target.classList.add("qt-bg-green-100");
                 ["Top", "Right", "Left", "Bottom"].forEach((pos) => {
-                  e.target.parentElement.style[`border${pos}Color`] = "green";
+                  e.target.style[`border${pos}Color`] = "green";
                 });
-                overElm.value = e.target.parentElement;
-              } else if (overElm.value) {
-                overElm.value.classList.remove("qt-bg-green-100");
-                ["Top", "Right", "Left", "Bottom"].forEach((pos) => {
-                  overElm.value.style[`border${pos}Color`] = "#9CA3AF";
-                });
+                overElm.value = e.target;
               }
               e.preventDefault();
             });
             elm.addEventListener("drop", (e) => {
               e.preventDefault();
+              console.log(e);
               const index =
+                Number(e.target.id.replace(`${props.qId}`, "")) ||
                 Number(e.target.id.replace(`${props.qId}BlankText`, "")) ||
                 Number(e.target.id.replace(`${props.qId}Answer`, ""));
+
               if (index) {
                 mcOptions.value.onDrop(e, index);
               }
@@ -174,15 +226,8 @@ export default {
       }, 200);
 
       setTimeout(() => {
-        emit("ready");
+        emit("start-time", true);
       }, 300);
-
-      // console.log(
-      //   "Component is mounted!",
-      //   props.question,
-      //   blankSpaces.value,
-      //   htmlText.value
-      // );
     };
 
     const defaultBorder = (elm) => {
@@ -194,6 +239,8 @@ export default {
       elm.style.borderTopColor = "transparent";
       elm.style.borderBottom = "1px solid";
       elm.style.borderBottomColor = "#9CA3AF";
+      elm.classList.remove("qt-bg-green-100");
+      counter.value = 0;
     };
 
     const removeAnswer = (value, reset = true) => {
@@ -299,7 +346,6 @@ export default {
       });
 
       emit("answer", selectedAnswers.value);
-      // console.log("selectedAnswers", selectedAnswers.value, preIndex);
     };
     return {
       blankSpaces,
@@ -313,6 +359,7 @@ export default {
       mcOptions,
       removeAnswer,
       overElm,
+      counter,
     };
   },
 };
