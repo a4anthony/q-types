@@ -22,7 +22,7 @@
       </audio>
     </div>
     <div
-      v-if="micCheck"
+      v-if="withRecorder"
       :class="
         view === 'section' || view === 'section2' ? 'section-audio-player' : ''
       "
@@ -49,7 +49,7 @@ export default {
       default: "section",
       required: true,
     },
-    micCheck: {
+    withRecorder: {
       type: Boolean,
       default: false,
     },

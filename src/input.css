@@ -56,7 +56,7 @@
   }
   button:disabled,
   button[disabled] {
-    @apply qt-bg-opacity-75   qt-cursor-not-allowed;
+    @apply qt-bg-opacity-75 hover:qt-bg-opacity-75 qt-cursor-not-allowed;
   }
 }
 

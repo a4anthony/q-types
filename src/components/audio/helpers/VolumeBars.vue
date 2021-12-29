@@ -1,21 +1,41 @@
 <template>
-  <div class="qt-bg-gray-100 qt-h-screen qt-relative qt-max-h-screen">
-    <navbar />
-    <div class="qt-max-w-4xl qt-mx-auto qt-mt-0 sm:qt-mt-3">
-      <main class="qt-relative">
-        <slot></slot>
-      </main>
-    </div>
-    <footer-bar />
+  <div
+    class="qt-w-1/2 qt-mx-auto qt-relative qt-h-2 qt-mb-5"
+    style="width: 205px"
+  >
+    <div
+      class="qt-pid qt-absolute"
+      :class="`qt-pid${uniqueKey}_${uniqueString}`"
+      v-for="(bar, index) in [0, 1, 2, 3, 4, 5]"
+      :key="`key${bar}`"
+      style="background-color: #e6e7e8"
+      :style="{
+        left: `${index * 35}px`,
+        width: `${30}px`,
+
+        height: `${5}px`,
+      }"
+    ></div>
   </div>
 </template>
 
 <script>
-import Navbar from "./Navbar";
-import FooterBar from "./FooterBar";
 export default {
-  name: "AppLayout",
-  components: { FooterBar, Navbar },
+  name: "VolumeBars",
+  props: {
+    audioQuality: {
+      type: Number,
+      default: 0,
+    },
+    uniqueKey: {
+      type: String,
+      default: "",
+    },
+    uniqueString: {
+      type: String,
+      default: "",
+    },
+  },
 };
 </script>
 

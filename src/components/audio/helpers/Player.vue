@@ -1,19 +1,9 @@
 <template>
   <div
+    v-if="withPlayer && !disablePlay"
     class="qt-max-w-md sm:qt-max-w-sm qt-mx-auto qt-border-2 qt-rounded-3xl qt-px-2 qt-py-1.5 qt-flex qt-space-x-2 qt-items-center"
     :class="`qt-border-${color}-600`"
   >
-    <!--play audio on error-->
-    <!--<button-->
-    <!--  v-if="plays === 0 && showPlayBtn && !audioPlaying && playError"-->
-    <!--  type="button"-->
-    <!--  :class="`qt-text-${color}-600 hover:qt-text-${color}-400`"-->
-    <!--  @click="$emit('play')"-->
-    <!--  :disabled="disablePlay"-->
-    <!--&gt;-->
-    <!--  <PlayIcon class="qt-w-6 qt-h-6" />-->
-    <!--</button>-->
-    <!--play audio-->
     <button
       v-if="!audioPlaying && !buffering"
       type="button"
@@ -51,15 +41,38 @@
     <!--audio duration-->
     <span
       :class="`qt-text-${color}-600`"
-      class="qt-tracking-wider qt-font-semibold qt-text-base qt-w-25 qt-flex-none qt-text-right"
+      class="qt-flex qt-justify-between qt-font-semibold qt-text-base qt-w-25 qt-flex-none qt-text-right"
     >
-      {{ currentTime }}/{{ totalDuration }}
+      <span class="qt-w-12 qt-text-center">{{ currentTime }}</span
+      >/
+      <span class="qt-w-12 qt-text-center">{{ totalDuration }}</span>
     </span>
+  </div>
+  <div v-show="withPlayer && disablePlay">
+    <div
+      class="qt-max-w-md sm:qt-max-w-sm qt-mx-auto qt-border-2 qt-rounded-3xl qt-px-2 qt-py-1.5 qt-flex qt-space-x-2 qt-items-center"
+      :class="`qt-border-${color}-600`"
+    >
+      <span :class="`qt-text-${color}-600 hover:qt-text-${color}-400`">
+        <CheckCircleIcon class="qt-w-6 qt-h-6" />
+      </span>
+      <div class="qt-flex-grow">
+        <span class="qt-font-semibold qt-text-base qt-text-left"
+          >Audio file</span
+        >
+      </div>
+      <span
+        :class="`qt-text-${color}-600`"
+        class="qt-tracking-wider qt-font-semibold qt-text-base qt-w-25 qt-flex-none qt-text-right"
+      >
+        {{ totalDuration }}
+      </span>
+    </div>
   </div>
 </template>
 
 <script>
-import { PlayIcon, PauseIcon } from "@heroicons/vue/solid";
+import { PlayIcon, PauseIcon, CheckCircleIcon } from "@heroicons/vue/solid";
 import LoadingIcon from "../../helpers/LoadingIcon";
 
 export default {
@@ -68,6 +81,7 @@ export default {
     LoadingIcon,
     PlayIcon,
     PauseIcon,
+    CheckCircleIcon,
   },
   props: {
     currentTime: {
@@ -77,6 +91,10 @@ export default {
     totalDuration: {
       type: String,
       default: "00:00",
+    },
+    withPlayer: {
+      type: Boolean,
+      required: true,
     },
     audioPlaying: {
       type: Boolean,

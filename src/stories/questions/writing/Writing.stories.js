@@ -2,7 +2,6 @@ import QuestionWrapper from "../../../components/helpers/QuestionWrapper";
 import WritingQuestion from "../../../components/questions/writing/WritingQuestion";
 import data from "../../../data";
 import { action } from "@storybook/addon-actions";
-import { Single } from "../../McQuestion.stories";
 
 export default {
   title: "Questions/Writing/WritingQuestion",

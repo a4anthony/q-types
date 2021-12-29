@@ -71,6 +71,7 @@
       :buffering="buffering"
       :disable-play="disablePlay"
       :play-error="false"
+      :with-player="withPlayer"
     />
   </div>
   <div v-if="loadError">
@@ -142,6 +143,10 @@ export default {
       type: Boolean,
       default: false,
     },
+    duration: {
+      type: Number,
+      default: 20,
+    },
   },
 
   emits: [
@@ -202,8 +207,8 @@ export default {
       // audioElm.value.load();
 
       // getDuration(audioElmSrc.value.src, (duration) => {
-      durationAmount.value = 104;
-      totalDuration.value = getTimeCodeFromNum(104);
+      durationAmount.value = props.duration;
+      totalDuration.value = getTimeCodeFromNum(props.duration);
       interval.value = setInterval(() => {
         if (audioPlaying.value && !props.withAvatar) {
           if (currentAudioTime.value) {
@@ -213,8 +218,11 @@ export default {
           currentTime.value = getTimeCodeFromNum(audioElm.value.currentTime);
           const progressBars = document.querySelectorAll(".qt-progress");
           for (let i = 0; i < progressBars.length; i++) {
-            progressBars[i].style.width =
-              (audioElm.value.currentTime / durationAmount.value) * 100 + "%";
+            let w = (audioElm.value.currentTime / durationAmount.value) * 100;
+            if (w > 100) {
+              w = 100;
+            }
+            progressBars[i].style.width = w + "%";
           }
         }
       }, 500);
