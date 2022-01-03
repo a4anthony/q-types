@@ -43,6 +43,7 @@
           <ArrowUpIcon v-else class="qt-w-4 qt-h-4 sm:qt-w-5 sm:qt-h-5" />
         </button>
       </div>
+      <slot name="page-loader"></slot>
       <!--<page-loader loader />-->
     </div>
     <!--footer-->
@@ -92,14 +93,14 @@ export default {
       window.addEventListener("touchstart", setHeight, true);
       window.addEventListener("touchend", setHeight, true);
 
-      const textarea = document.getElementById("answer");
+      const textarea = document.getElementById("qtAnswer");
       if (textarea) {
         textarea.addEventListener("focusin", setHeight, true);
         textarea.addEventListener("focusout", setHeight, true);
       }
     });
 
-    const setHeight = (time = 100) => {
+    const setHeight = () => {
       const wHeight = window.innerHeight;
       const navHeight = document.getElementById("qtNavbar").clientHeight;
       let footerHeight = document.getElementById("qtFooter").clientHeight;
@@ -119,7 +120,7 @@ export default {
 
     const scrollDown = () => {
       scroll.value = true;
-      setHeight(0);
+      setHeight();
     };
 
     return {
@@ -127,6 +128,7 @@ export default {
       scroll,
       scrollDown,
       scrolling,
+      setHeight,
     };
   },
 };

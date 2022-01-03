@@ -3,23 +3,26 @@
 
   <div
     :style="{ height }"
-    :class="
+    :class="[
       xl
         ? ' xl:qt-flex-row xl:qt-flex-row-reverse xl:qt-grid xl:qt-gap-2 xl:qt-grid-cols-2'
-        : ' sm:qt-flex-row sm:qt-flex-row-reverse sm:qt-grid sm:qt-gap-2 sm:qt-grid-cols-2'
-    "
+        : ' sm:qt-flex-row sm:qt-flex-row-reverse sm:qt-grid sm:qt-gap-2 sm:qt-grid-cols-2',
+      verticalAlign && 'qt-items-center',
+    ]"
     class="qt-flex qt-flex-col qt-h-100 qt-justify-start qt-content-start--"
   >
     <div
       :class="[
         xl ? 'qt-mb-4 xl:qt-mb-0' : 'qt-mb-4 sm:qt-mb-0',
         rightContentHeight > height && 'qt-overflow-y-auto',
+        verticalAlign && 'qt-flex qt-items-center',
       ]"
+      class="qt-w-full"
       :style="{
         height: rightContentHeight > height ? height : rightContentHeight,
       }"
     >
-      <div id="qtRightContent">
+      <div id="qtRightContent" class="qt-w-full">
         <slot name="right-content"></slot>
       </div>
     </div>
@@ -54,6 +57,10 @@ export default {
       default: false,
     },
     withDivider: {
+      type: Boolean,
+      default: false,
+    },
+    verticalAlign: {
       type: Boolean,
       default: false,
     },

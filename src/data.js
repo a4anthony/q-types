@@ -147,6 +147,28 @@ const data = {
                     <span class="block">Kind regards,</span>
                     <span class="block">Ahmed</span>
                 </p>`,
+  writingQuestionWithImage: {
+    id: 463,
+    content:
+      "<p>Write a story or a short essay based on the images below.</p><br><p class='text-center'><div class='horizontalimgscroll dragscroll'><img src='images/S1Q8.png' style='width: 3010px; max-width: 3010px;'></p></div>",
+    side_content: null,
+    type: 1,
+    time_limit_seconds: 600,
+    media: null,
+    meta: null,
+    hide_input: 0,
+    media_length: null,
+    answers: [],
+    fill_in_blanks: [],
+    section_question_name: "Written Expression 2",
+    current_section: 4,
+    current_question_nr: 0,
+    section_question_count: 1,
+    current_skill: "Writing",
+    skills: ["Listening", "Grammar", "Reading", "Writing", "Speaking"],
+    view: "question",
+    progress: 40,
+  },
 };
 
 export default data;

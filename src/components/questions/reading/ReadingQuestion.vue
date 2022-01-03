@@ -71,7 +71,7 @@ export default {
         "answered",
         props.type === "radio"
           ? {
-              answer_id: props.type === "radio",
+              answer_id: selectedOption.id,
               question_id: props.currentQuestion.id,
               section_id: props.currentSection.id,
             }

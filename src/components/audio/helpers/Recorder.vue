@@ -45,9 +45,11 @@
     </div>
   </div>
   <div class="qt-mx-auto qt-my-3 qt-text-center">
+    <!--qt-h-32 qt-bg-red-400-->
+    <!--&& (!view || view !== 'question')-->
     <app-button
       @click="startRecording"
-      v-if="!recording && !audioUrl && (!view || view !== 'question')"
+      v-if="!recording && !audioUrl"
       class="qt-btn qt-btn-md"
       :disabled="audioFile || !allowRecording"
       btn-color-class="qt-btn-white"
@@ -154,8 +156,8 @@ export default {
     });
 
     const resetRecorder = () => {
-      const testAudio = document.getElementById("test_player2");
-      const testAudioSource = document.querySelector("#test_player2 source");
+      const testAudio = document.getElementById("qt_test_player2");
+      const testAudioSource = document.querySelector("#qt_test_player2 source");
       if (testAudio && testAudioSource) {
         testAudioSource.src = "";
         testAudio.pause();
@@ -231,9 +233,9 @@ export default {
             });
             audioFile.value = audioBlob;
             audioUrl.value = URL.createObjectURL(audioBlob);
-            const testAudio = document.getElementById("test_player2");
+            const testAudio = document.getElementById("qt_test_player2");
             const testAudioSource = document.querySelector(
-              "#test_player2 source"
+              "#qt_test_player2 source"
             );
             if (testAudio && testAudioSource) {
               testAudioSource.src = audioUrl.value;
@@ -286,7 +288,6 @@ export default {
     const setWidth = () => {
       const gap = 100 / props.timeLimit;
       width.value = width.value + gap;
-      console.log(width.value);
     };
     const setAudioContext = () => {
       const AudioContext = window.AudioContext || window.webkitAudioContext;

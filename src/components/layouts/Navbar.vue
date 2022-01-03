@@ -1,7 +1,8 @@
 <template>
   <nav
     id="qtNavbar"
-    class="qt-justify-between qt-items-center qt-hidden sm:qt-flex qt-py-0.5 sm:qt-py-2 qt-bg-white qt-px-2 qt-border-b"
+    :class="view === 'question' ? 'qt-hidden sm:qt-flex' : 'qt-flex'"
+    class="qt-justify-between qt-items-center qt-py-0.5 sm:qt-py-2 qt-bg-white qt-px-2 qt-border-b"
   >
     <div class="qt-flex qt-justify-center">
       <img
@@ -46,6 +47,10 @@ export default {
   name: "Navbar",
   components: { Logo },
   props: {
+    view: {
+      type: String,
+      required: true,
+    },
     test: {
       type: Object,
       default() {

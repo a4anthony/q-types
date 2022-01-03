@@ -17,3 +17,5 @@ cp q-types-module-1.0.5.tgz ~/www/teq/
 cd ~/www/teq/
 
 npm i q-types-module-1.0.5.tgz
+
+npm run dev

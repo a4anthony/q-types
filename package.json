@@ -30,7 +30,8 @@
     "storybook": "start-storybook -p 6006",
     "build-storybook": "build-storybook",
     "tailwind-watch": "npx tailwindcss -i ./src/input.css -o ./dist/output.css --watch  --minify",
-    "tailwind": "npx tailwindcss -i ./src/input.css -o ./dist/output.css --minify"
+    "tailwind": "npx tailwindcss -i ./src/input.css -o ./dist/output.css --minify",
+    "link": "/bin/zsh /Users/anthony/vue/mc-q/link.sh"
   },
   "dependencies": {
     "@heroicons/vue": "^1.0.5",

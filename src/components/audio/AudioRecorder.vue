@@ -29,7 +29,7 @@
         @listened="$emit('listened')"
         with-player
         :disable-play="view !== 'section'"
-        player-id="test_player2"
+        player-id="qt_test_player2"
         :view="view"
         :duration="duration"
       />
@@ -118,7 +118,7 @@ export default {
     },
     allowRecording: {
       type: Boolean,
-      default: true,
+      default: false,
     },
     showError: {
       type: Boolean,
@@ -140,6 +140,7 @@ export default {
     const audioUrl = ref("");
     const recorderRef = ref(null);
     const duration = ref(0);
+
     onMounted(() => {
       getRandomString(10);
     });

@@ -12,12 +12,22 @@
     >
       clickkkk
     </button>
+    <div class="qt-hidden">
+      <audio id="qt_test_tone" class="hidden" controls>
+        <source :src="testToneSrc" type="audio/mp3" />
+      </audio>
+    </div>
     <div
       :class="
         view === 'section' || view === 'section2' ? 'section-audio-player' : ''
       "
     >
-      <audio ref="testPlayer" id="test_player" preload="auto" class="qt-hidden">
+      <audio
+        ref="testPlayer"
+        id="qt_test_player"
+        preload="auto"
+        class="qt-hidden"
+      >
         <source :src="`${src}?v=${randString}`" type="audio/mp3" />
       </audio>
     </div>
@@ -27,7 +37,7 @@
         view === 'section' || view === 'section2' ? 'section-audio-player' : ''
       "
     >
-      <audio id="test_player2" preload="auto" class="qt-hidden">
+      <audio id="qt_test_player2" preload="auto" class="qt-hidden">
         <source :src="src" type="audio/mp3" />
       </audio>
     </div>
@@ -52,6 +62,10 @@ export default {
     withRecorder: {
       type: Boolean,
       default: false,
+    },
+    testToneSrc: {
+      type: String,
+      default: "audio/testtone.mp3",
     },
     src: {
       type: String,

@@ -1,21 +1,40 @@
 <template>
-  <div class="qt-bg-gray-100 qt-h-screen qt-relative qt-max-h-screen">
-    <navbar view="question" />
-    <div class="qt-max-w-4xl qt-mx-auto qt-mt-0 sm:qt-mt-3">
-      <main class="qt-relative">
-        <slot></slot>
-      </main>
-    </div>
-    <footer-bar />
-  </div>
+  <audio id="test_tone" class="hidden" controls>
+    <source src="/audio/testtone.mp3" type="audio/mp3" />
+  </audio>
 </template>
 
 <script>
-import Navbar from "./Navbar";
-import FooterBar from "./FooterBar";
+import { onMounted } from "vue";
+
 export default {
-  name: "AppLayout",
-  components: { FooterBar, Navbar },
+  name: "TestTone",
+  props: {
+    src: {
+      type: String,
+      default: "audio/testtone.mp3",
+    },
+  },
+  emits: ["tone-played"],
+  setup(_, { emit }) {
+    onMounted(() => {
+      const audio = document.getElementById("test_tone");
+      audio.addEventListener("play", () => {
+        setTimeout(() => {
+          emit("tone-played");
+        }, 1000);
+      });
+    });
+
+    const playTone = () => {
+      const audio = document.getElementById("test_tone");
+      audio.play();
+    };
+
+    return {
+      playTone,
+    };
+  },
 };
 </script>
 

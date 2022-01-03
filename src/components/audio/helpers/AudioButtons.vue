@@ -3,17 +3,27 @@
     v-if="plays === 1 && replay"
     @click="$emit('play')"
     :class="`qt-text-gray-600 hover:qt-text-gray-400`"
-    class="focus:qt-outline-none qt-inline-flex qt-justify-center qt-items-center qt-text-lg qt-font-semibold"
+    class="focus:qt-outline-none qt-inline-flex qt-text-base qt-justify-center qt-items-center sm:qt-text-lg qt-font-semibold"
   >
     <RefreshIcon class="qt-w-5 qt-h-5 qt-mr-1 qt-font-bold" />
     replay
   </button>
 
   <button
+    v-if="replayed"
+    :class="`qt-text-gray-300`"
+    class="focus:qt-outline-none qt-inline-flex qt-text-base qt-justify-center qt-items-center sm:qt-text-lg qt-font-semibold"
+    disabled
+  >
+    <RefreshIcon class="qt-w-5 qt-h-5 qt-mr-1 qt-font-bold" />
+    replayed
+  </button>
+
+  <button
     @click="$emit('play')"
     v-if="plays === 0 && showPlayBtn && !audioPlaying"
     :class="`qt-text-gray-600 hover:qt--gray-400`"
-    class="focus:qt-outline-none qt-inline-flex qt-justify-center qt-items-center qt-text-lg qt-font-semibold"
+    class="focus:qt-outline-none qt-inline-flex qt-text-base qt-justify-center qt-items-center sm:qt-text-lg qt-font-semibold"
   >
     <PlayIcon class="qt-w-5 qt-h-5 qt-mr-1 qt-font-bold" />
     play
@@ -43,6 +53,10 @@ export default {
       required: true,
     },
     audioPlaying: {
+      type: Boolean,
+      required: true,
+    },
+    replayed: {
       type: Boolean,
       required: true,
     },

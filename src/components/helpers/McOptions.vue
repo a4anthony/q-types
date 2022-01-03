@@ -1,6 +1,6 @@
 <template>
   <div
-    class="qt-block sm:qt-hidden qt-mt-12 qt-bg-gray-100 qt-scrollbar-thin qt-scrollbar-thumb-blue-700 qt-scrollbar-track-blue-300 qt-overflow-x-scroll qt-scrollbar-thumb-rounded-full qt-scrollbar-track-rounded-full"
+    class="qt-hidden qt-mt-12 qt-bg-gray-100 qt-scrollbar-thin qt-scrollbar-thumb-blue-700 qt-scrollbar-track-blue-300 qt-overflow-x-scroll qt-scrollbar-thumb-rounded-full qt-scrollbar-track-rounded-full"
   >
     <div
       class="qt-h-17 qt-shadow-sm qt-w-full qt-flex qt-justify-start qt-items-center qt-space-x-2 qt-mx-2"
@@ -19,8 +19,9 @@
       </span>
     </div>
   </div>
+  <!--qt-hidden sm:-->
   <div
-    class="qt-hidden sm:qt-flex qt-flex-wrap qt-pb-2 qt-mt-12 qt-justify-center qt-bg-gray-100 qt-shadow-sm qt-px-2"
+    class="qt-flex qt-flex-wrap qt-pb-2 qt-mt-12 qt-justify-center qt-bg-gray-100 qt-shadow-sm qt-px-2"
   >
     <span
       :draggable="true"

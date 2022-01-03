@@ -17,12 +17,11 @@
   </div>
   <div v-if="initialPlay && !withPlayer && !loadError">
     <div v-if="withAvatar">
-      <audio-avatar />
-      <div
-        v-if="audioPlaying && withAvatar && !buffering"
-        class="qt-space-x-1 qt-mt-2 qt-flex qt-justify-center"
-      >
-        <audio-dots />
+      <div style="height: 80px">
+        <audio-avatar />
+      </div>
+      <div class="qt-space-x-1 qt-h-2 qt-mt-2 qt-flex qt-justify-center">
+        <audio-dots v-if="audioPlaying && withAvatar && !buffering" />
       </div>
       <div
         v-if="audioPlaying && withAvatar && buffering"
@@ -34,7 +33,11 @@
         />
       </div>
     </div>
-    <div v-else>
+    <div
+      v-else
+      class="qt-flex qt-justify-center qt-items-center"
+      style="height: 80px"
+    >
       <audio-bars v-if="audioPlaying && !buffering" :playing="audioPlaying" />
       <div
         v-if="audioPlaying && buffering"
@@ -47,7 +50,7 @@
 
     <div
       v-if="!audioPlaying && withHelperButtons"
-      class="qt-text-center"
+      class="qt-text-center qt-mb-4"
       style="left: 30px"
     >
       <audio-buttons
@@ -56,6 +59,7 @@
         :show-play-btn="showPlayBtn"
         :audio-playing="audioPlaying"
         @play="playByEmit"
+        :replayed="replayed"
       />
     </div>
   </div>
@@ -109,7 +113,7 @@ export default {
   props: {
     playerId: {
       type: String,
-      default: "test_player",
+      default: "qt_test_player",
     },
     view: {
       type: String,
@@ -177,6 +181,7 @@ export default {
     const buffering = ref(false);
     const initialPlay = ref(false);
     const reloading = ref(false);
+    const replayed = ref(false);
 
     onMounted(() => {
       initialMount();
@@ -198,6 +203,7 @@ export default {
       console.log("audio mounted");
       audioElm.value = document.getElementById(props.playerId);
       audioElmSrc.value = document.querySelector(`#${props.playerId} source`);
+
       if (props.view === "section" || props.view === "section2") {
         console.log("audio load initialized");
         emit("section-audio-played", false);
@@ -235,7 +241,7 @@ export default {
       if (props.withPlayer) {
         showPlayBtn.value = true;
       }
-      console.log(audioElm.value);
+      // console.log(audioElm.value);
     };
     /**
      * Audio events
@@ -341,6 +347,11 @@ export default {
           progressBars[i].style.width = "100%";
         }
       }
+
+      if (plays.value > 1) {
+        replayed.value = true;
+      }
+      console.log(plays.value, replayed.value);
       emit("ended");
     };
     /**
@@ -414,6 +425,7 @@ export default {
       retryAttempts,
       reloadAudio,
       reloading,
+      replayed,
     };
   },
 };

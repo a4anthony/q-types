@@ -95,3 +95,13 @@ withoutStringLimit.args = {
 withoutStringLimit.parameters = {
   layout: "fullscreen",
 };
+
+export const withImage = Template.bind({});
+withImage.args = {
+  currentQuestion: data.writingQuestionWithImage,
+  hideInfo: true,
+  currentSection: data.section,
+};
+withImage.parameters = {
+  layout: "fullscreen",
+};

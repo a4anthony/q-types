@@ -60,6 +60,22 @@ withAudio.parameters = {
   layout: "fullscreen",
 };
 
+export const withAudioNoImage = Template.bind({});
+withAudioNoImage.args = {
+  currentSection: {
+    id: 11,
+  },
+  currentQuestion: {
+    id: 11,
+    content: "",
+    answers: data.radioOptions,
+    media: "audio/Q13-UK.mp3",
+  },
+};
+withAudioNoImage.parameters = {
+  layout: "fullscreen",
+};
+
 export const withAudioAndError = Template.bind({});
 withAudioAndError.args = {
   currentSection: {

@@ -2,6 +2,7 @@
   <div
     class="qt-relative qt-mx-auto qt-flex qt-justify-center qt-rounded-full qt-overflow-hidden qt-w-full qt-h-full"
     :class="`qt-bg-${color}-100`"
+    style="width: 80px"
   >
     <inline-svg
       v-if="avatar"
@@ -12,7 +13,7 @@
 </template>
 
 <script>
-import { ref } from "vue";
+import { onMounted, ref } from "vue";
 import InlineSvg from "vue-inline-svgs";
 
 export default {
@@ -23,8 +24,29 @@ export default {
   props: {},
 
   setup() {
-    const avatar = ref("Susan-1");
+    const avatar = ref("");
 
+    onMounted(() => {
+      const audioElm = document.getElementById("qt_test_player");
+      const audioElmSrc = document.querySelector("#qt_test_player source");
+
+      if (audioElm && audioElmSrc) {
+        setTimeout(() => {
+          console.log(audioElmSrc.src);
+          if (
+            audioElmSrc.src.toString().includes("speaking-onboarding") ||
+            audioElmSrc.src.toString().includes("oralintro-uk") ||
+            audioElmSrc.src.toString().includes("UK") ||
+            audioElmSrc.src.toString().includes("uk")
+          ) {
+            avatar.value = "Colin-2";
+          } else {
+            avatar.value = "Susan-1";
+          }
+          console.log(avatar.value);
+        }, 200);
+      }
+    });
     return {
       avatar,
     };

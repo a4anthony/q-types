@@ -7,11 +7,17 @@
       <div
         id="qtAudioRadioQuestionAudioPlayer"
         v-if="!radioOnly"
-        class="qt-relative qt-mx-auto"
+        class="qt-relative qt-mx-auto qt-flex qt-justify-center qt-items-center"
+        :class="!currentQuestion.content && 'qt-mb-12'"
+        style="height: 80px"
       >
         <audio-player
           @ended="$emit('start-time', true)"
-          @pause-time="$emit('pause-time')"
+          @pause-time="
+            (val) => {
+              $emit('pause-time', val);
+            }
+          "
           @section-audio-played="
             (val) => {
               $emit('section-audio-played', val);
