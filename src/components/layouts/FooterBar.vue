@@ -1,7 +1,7 @@
 <template>
   <footer
     id="qtFooter"
-    class="qt-bg-transparent sm:qt-bg-white qt-border-t-0 sm:qt-border-t qt-absolute qt-bottom-0 qt-left-0 qt-right-0 qt-py-2 sm:qt-py-3 qt-px-2 qt-w-full qt-text-center qt-flex qt-items-center qt-justify-center"
+    class="qt-bg-white sm:qt-bg-transparent sm:qt-bg-white qt-border-t qt-absolute qt-bottom-0 qt-left-0 qt-right-0 qt-py-2 sm:qt-py-3 qt-px-2 qt-w-full qt-text-center qt-flex qt-items-center qt-justify-center"
   >
     <div class="qt-w-full">
       <span

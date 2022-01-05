@@ -1,5 +1,7 @@
 import { app } from "@storybook/vue3";
 import "../dist/output.css";
+import "../src/fontawesome";
+import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 
 app.mixin({
   computed: {
@@ -8,6 +10,7 @@ app.mixin({
     },
   },
 });
+app.component("fa-icon", FontAwesomeIcon);
 app.provide("color", "blue");
 
 // app.provide("color", "blue");

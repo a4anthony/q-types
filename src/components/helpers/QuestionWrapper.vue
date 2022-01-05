@@ -2,13 +2,13 @@
   <default-audio view="question" />
   <app-layout>
     <page-container>
-      <template v-slot:header>
+      <template v-if="!noSlots" v-slot:header>
         <question-header v-bind="bindData.questionHeaderArgs" />
       </template>
       <template v-slot:content>
         <slot @start-time="startTime"></slot>
       </template>
-      <template v-slot:footer-right>
+      <template v-if="!noSlots" v-slot:footer-right>
         <question-actions v-bind="bindData.questionActionArgs" />
       </template>
     </page-container>
@@ -31,6 +31,12 @@ export default {
     PageContainer,
     AppLayout,
     DefaultAudio,
+  },
+  props: {
+    noSlots: {
+      type: Boolean,
+      default: false,
+    },
   },
   computed: {
     bindData() {

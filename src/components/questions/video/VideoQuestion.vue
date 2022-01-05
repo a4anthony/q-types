@@ -59,6 +59,7 @@
           :class="`qt-bg-${color}-600 hover:qt-bg-${color}-400 qt-text-white`"
           class="qt-rounded-full qt-w-6 qt-h-6 qt-flex qt-items-center qt-justify-center"
           @click="startRecording"
+          disabled
         >
           <VideoCameraIcon class="qt-w-4 qt-h-4" />
         </button>
@@ -121,7 +122,7 @@
 </template>
 
 <script>
-import { onMounted, reactive, ref, computed } from "vue";
+import { onMounted, reactive, ref, computed, watch } from "vue";
 import Settings from "../../helpers/Settings";
 import { VideoCameraIcon } from "@heroicons/vue/solid";
 import { CheckCircleIcon } from "@heroicons/vue/outline";
@@ -165,14 +166,25 @@ export default {
     const blobsRecorded = ref([]);
     const width = ref(0);
     const cameraStarted = ref(false);
-    const countDown = ref(3);
     const recStart = ref(false);
     const videoBlob = ref("");
     const interval = ref(null);
     const interval2 = ref(null);
-    const timeLimit = computed(() => props.currentQuestion.time_limit_seconds);
+    const timeLimit = computed(() =>
+      props.currentQuestion.time_limit_seconds > 0
+        ? props.currentQuestion.time_limit_seconds
+        : 30
+    );
+    const countDown = ref(props.currentQuestion.time_to_prepare);
 
+    watch(cameraStarted, () => {
+      // console.log("cam started", newValue);
+      setTimeout(() => {
+        startRecording();
+      }, 200);
+    });
     onMounted(() => {
+      // countDown.value = props.currentQuestion.time_to_prepare;
       setInitialTime();
     });
 
@@ -187,39 +199,49 @@ export default {
 
     const useHeight = async (pageHeight) => {
       const formattedHeight = Number(pageHeight.replace("px", ""));
-      height.value =
-        formattedHeight -
-        document.getElementById("videoQuestionContent").clientHeight -
-        100;
-      console.log(pageHeight, formattedHeight, height.value);
+      if (document.getElementById("videoQuestionContent")) {
+        height.value =
+          formattedHeight -
+          document.getElementById("videoQuestionContent").clientHeight -
+          100;
+        // console.log(pageHeight, formattedHeight, height.value);
+      }
       if (!cameraStarted.value) {
         await startCamera();
       }
     };
 
     const startCamera = async () => {
-      console.log("starting video  camera");
+      // console.log("starting video  camera");
       let video = document.getElementById("video");
-      const videoWidth = video.clientWidth;
-      const videoHeight = video.clientHeight;
-      console.log(videoWidth, videoHeight);
+      // const videoWidth = video.clientWidth;
+      // const videoHeight = video.clientHeight;
+      // console.log(videoWidth, videoHeight);
       navigator.mediaDevices
         .getUserMedia({
           audio: true,
           video: { width: 640, height: 480, facingMode: "user" },
         })
-        .then((stream) => {
+        .then(async (stream) => {
           cameraStream.value = stream;
           video.srcObject = stream;
           video.muted = true;
-          video.play();
+          try {
+            await video.play();
+          } catch (e) {
+            console.log(e);
+          }
           cameraStarted.value = true;
+          // startRecording();
         })
         .then(
-          () => new Promise((resolve) => (video.onloadedmetadata = resolve))
+          () =>
+            new Promise((resolve) => {
+              video.onloadedmetadata = resolve;
+            })
         )
         .then(() => {
-          console.log(video.videoWidth + "x" + video.videoHeight);
+          // console.log(video.videoWidth + "x" + video.videoHeight);
         });
     };
 
@@ -260,23 +282,33 @@ export default {
         let videoLocal = URL.createObjectURL(
           new Blob(blobsRecorded.value, { type: "video/webm" })
         );
-        console.log(mimeType);
+        // console.log(mimeType);
         let videoLocalBlob = new Blob(blobsRecorded.value, {
           type: "video/mp4",
         });
-        console.log(videoLocal);
+        // console.log(videoLocal)
         videoBlob.value = videoLocal;
         recording.value = false;
         const reader = new FileReader();
         reader.readAsDataURL(videoLocalBlob);
+
+        const videoFile = new File([videoLocalBlob], "video/mp4", {
+          type: videoLocalBlob.type,
+        });
+
+        console.log(videoFile);
+
+        // console.log(videoLocalBlob)
         reader.onloadend = function () {
           const base64data = reader.result;
           emit("answered", {
             section_id: props.currentSection.id,
             question_id: props.currentQuestion.id,
             video_blob: base64data,
+            video_blob_2: videoLocalBlob,
+            video_file: videoFile,
           });
-          console.log(base64data);
+          // console.log(base64data)
         };
         // download_link.href = video_local;
       });

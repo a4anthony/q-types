@@ -50,6 +50,7 @@ videoOnly.args = {
     ...data.question,
     content: "Tell us about your favourite holiday.",
     time_limit_seconds: 30,
+    time_to_prepare: 10,
   },
   options: data.blankSpaceOptions,
   currentSection: data.section,
