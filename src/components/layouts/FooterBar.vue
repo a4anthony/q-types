@@ -14,10 +14,17 @@
         class="qt-flex qt-justify-between sm:qt-justify-center qt-w-full qt-items-center"
       >
         <img
-          v-if="test && test.client_logo"
+          v-if="test"
+          v-show="test && test.client_logo && hasLogo"
           class="qt-h-5 qt-w-auto qt-flex qt-flex-none sm:qt-hidden"
           :src="test.client_logo"
+          id="qtFooterLogo"
           :alt="test.company_name"
+        />
+        <logo
+          v-if="test"
+          v-show="(test && !test.client_logo) || hasLogo === false"
+          :size="30"
         />
 
         <div class="qt-flex-grow qt-flex qt-justify-end sm:qt-justify-center">
@@ -49,8 +56,13 @@
 </template>
 
 <script>
+import { onMounted, reactive, ref, watch } from "vue";
+import Logo from "../helpers/Logo";
+import _ from "lodash";
+
 export default {
   name: "FooterBar",
+  components: { Logo },
   props: {
     test: {
       type: Object,
@@ -58,7 +70,7 @@ export default {
         return {
           taker: "John Doe",
           test_name: "English Proficiency Test",
-          company_name: "TEQ",
+          company_name: "company_logo",
           client_logo: "images/company_logo.png",
         };
       },
@@ -67,6 +79,36 @@ export default {
       type: String,
       default: "/privacy",
     },
+  },
+  setup(props) {
+    props = reactive(props);
+    const hasLogo = ref(null);
+
+    watch(
+      () => _.cloneDeep(props.test),
+      () => {
+        setTimeout(() => {
+          window.addEventListener("load", () => {
+            const image = document.getElementById("qtFooterLogo");
+            hasLogo.value = image.complete && image.naturalHeight !== 0;
+            // console.log(hasLogo.value);
+          });
+        }, 200);
+      }
+    );
+    onMounted(() => {
+      window.addEventListener("load", () => {
+        const image = document.getElementById("qtFooterLogo");
+        if (image) {
+          hasLogo.value = image.complete && image.naturalHeight !== 0;
+        }
+        // console.log(hasLogo.value);
+      });
+    });
+
+    return {
+      hasLogo,
+    };
   },
 };
 </script>

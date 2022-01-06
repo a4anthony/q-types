@@ -146,6 +146,7 @@ export default {
     onMounted(() => {
       emit("start-time", true);
     });
+
     const useHeight = (heightVal) => {
       height.value = Number(heightVal.replace("px", ""));
       console.log(height.value);

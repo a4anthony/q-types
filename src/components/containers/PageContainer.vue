@@ -98,6 +98,11 @@ export default {
         textarea.addEventListener("focusin", setHeight, true);
         textarea.addEventListener("focusout", setHeight, true);
       }
+
+      const resize_ob = new ResizeObserver(function () {
+        setHeight();
+      });
+      resize_ob.observe(document.getElementById("qtFooter"));
     });
 
     const setHeight = () => {
@@ -110,7 +115,8 @@ export default {
       //   ).clientHeight;
       // }
       // console.dir(document.getElementById("qtNavbar"));
-      if (footerHeight < 45) {
+      // console.log(footerHeight);
+      if (footerHeight < 55) {
         height.value = `${wHeight - (navHeight + footerHeight)}px`;
       } else {
         height.value = `${wHeight - (navHeight + footerHeight + 32)}px`;

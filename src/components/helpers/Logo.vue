@@ -1,7 +1,7 @@
 <template>
   <div class="mx-auto">
     <inline-svg
-      :size="35"
+      :size="size"
       :path="require(`!html-loader!./../../assets/svgs/logo.svg`)"
     />
   </div>
@@ -14,6 +14,12 @@ export default {
   name: "Logo",
   components: {
     InlineSvg,
+  },
+  props: {
+    size: {
+      type: Number,
+      default: 35,
+    },
   },
 };
 </script>
