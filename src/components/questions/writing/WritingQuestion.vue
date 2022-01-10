@@ -7,8 +7,7 @@
       }"
       class="qt-flex qt-items-center qt-justify-center"
     >
-      question info on hide input
-      <!--<question-info :text="currentQuestion ? currentQuestion.content : sampleQuestion1" />-->
+      <question-info :text="currentQuestion.content" />
     </div>
     <dual-view-question-container v-else reverse gray-background>
       <template v-slot:left-content>
@@ -71,9 +70,10 @@
 import DualViewQuestionContainer from "../../containers/DualViewQuestionContainer";
 import Settings from "../../helpers/Settings";
 import { reactive, ref, watch, computed, onMounted } from "vue";
+import QuestionInfo from "../../helpers/QuestionInfo";
 export default {
   name: "WritingQuestion",
-  components: { Settings, DualViewQuestionContainer },
+  components: { QuestionInfo, Settings, DualViewQuestionContainer },
   props: {
     hideInfo: {
       type: Boolean,

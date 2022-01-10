@@ -208,7 +208,9 @@ export default {
         console.log("audio load initialized");
         emit("section-audio-played", false);
       }
-      audioEvents(audioElm.value, audioElmSrc.value);
+      if (!props.disablePlay) {
+        audioEvents(audioElm.value, audioElmSrc.value);
+      }
 
       // audioElm.value.load();
 

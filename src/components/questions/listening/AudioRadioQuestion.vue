@@ -12,7 +12,7 @@
         style="height: 80px"
       >
         <audio-player
-          @ended="$emit('start-time', true)"
+          @ended="startTime"
           @pause-time="
             (val) => {
               $emit('pause-time', val);
@@ -105,6 +105,7 @@ export default {
 
     onMounted(() => {
       if (props.radioOnly) {
+        // console.log("radio only");
         emit("start-time", true);
       }
     });
@@ -143,8 +144,13 @@ export default {
       }
     };
 
+    const startTime = () => {
+      // console.log("starting time from question");
+      emit("start-time", true);
+    };
     return {
       useHeight,
+      startTime,
     };
   },
 };

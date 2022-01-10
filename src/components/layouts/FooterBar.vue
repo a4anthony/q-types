@@ -14,18 +14,13 @@
         class="qt-flex qt-justify-between sm:qt-justify-center qt-w-full qt-items-center"
       >
         <img
-          v-if="test"
-          v-show="test && test.client_logo && hasLogo"
+          v-if="test && test.client_logo"
           class="qt-h-5 qt-w-auto qt-flex qt-flex-none sm:qt-hidden"
           :src="test.client_logo"
           id="qtFooterLogo"
           :alt="test.company_name"
         />
-        <logo
-          v-if="test"
-          v-show="(test && !test.client_logo) || hasLogo === false"
-          :size="30"
-        />
+        <logo v-if="test && !test.client_logo" :size="30" />
 
         <div class="qt-flex-grow qt-flex qt-justify-end sm:qt-justify-center">
           <span

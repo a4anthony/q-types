@@ -72,22 +72,22 @@
       >
     </div>
     <div v-if="micError">
-      dsjjjdffdjjdfjdfdfj
-
-      <!--<test-on-error-->
-      <!--    :contact-msg="false"-->
-      <!--    error-msg="Oops! It looks like your browser does not have permission to use your microphone. Please give the browser permission in order to continue."-->
-      <!--    @retry="-->
-      <!--              () => {-->
-      <!--                  this.retryAttempts += 1;-->
-      <!--                  this.startRecording();-->
-      <!--                  this.microphoneError = false;-->
-      <!--              }-->
-      <!--          "-->
-      <!--    :attempts="retryAttempts"-->
-      <!--    :total-attempts="3"-->
-      <!--    link="https://the-english-quiz&#45;&#45;2.drift.help/article/how-do-i-enable-my-microphone"-->
-      <!--/>-->
+      <media-error
+        :reloading="false"
+        :contact-msg="false"
+        error-msg="Oops! It looks like your browser does not have permission to use your microphone. Please give the browser permission in order to continue."
+        @retry="
+          () => {
+            this.retryAttempts += 1;
+            // this.startRecording();
+            this.micError = false;
+          }
+        "
+        :attempts="retryAttempts"
+        :total-attempts="3"
+        link="https://the-english-quiz--2.drift.help/article/how-do-i-enable-my-microphone"
+        show-link
+      />
     </div>
   </div>
 </template>
@@ -100,9 +100,17 @@ import { onMounted, ref } from "vue";
 import uniqueId from "lodash/uniqueId";
 import AudioPlayer from "./AudioPlayer";
 import AppButton from "../helpers/AppButton";
+import MediaError from "../helpers/MediaError";
 export default {
   name: "AudioRecorder",
-  components: { AppButton, AudioPlayer, Recorder, VolumeBars, ExclamationIcon },
+  components: {
+    MediaError,
+    AppButton,
+    AudioPlayer,
+    Recorder,
+    VolumeBars,
+    ExclamationIcon,
+  },
   props: {
     uniqueKey: {
       type: String,
@@ -140,6 +148,7 @@ export default {
     const audioUrl = ref("");
     const recorderRef = ref(null);
     const duration = ref(0);
+    const retryAttempts = ref(0);
 
     onMounted(() => {
       getRandomString(10);
@@ -206,6 +215,7 @@ export default {
       noAudio,
       quality,
       recording,
+      retryAttempts,
     };
   },
 };

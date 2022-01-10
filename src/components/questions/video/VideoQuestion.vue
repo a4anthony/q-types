@@ -7,116 +7,32 @@
     >
       {{ currentQuestion.content }}
     </div>
-    <div class="qt-relative qt-flex qt-justify-center qt-w-full">
-      <div
-        v-show="height > 100"
-        :style="{ height: `${280}px` }"
-        :class="height > 0 ? 'qt-visible' : 'qt-invisible'"
-        class="qt-relative"
-      >
-        <video
-          style="height: 100%; object-fit: cover"
-          id="video"
-          :class="!recording && 'qt-filter qt-blur-sm'"
-          class="qt-rounded-lg qt-border qt-border-gray-200"
-          width="400"
-          autoplay
-          playsinline
-        ></video>
 
-        <div
-          v-if="cameraStarted && !recording"
-          class="qt-absolute qt-inset-0 qt-z-10 qt-rounded-lg qt-flex qt-justify-center qt-items-center qt-bg-gray-800 qt-bg-opacity-90"
-        >
-          <div
-            v-if="recStart && !recording"
-            class="qt-absolute qt-bottom-4 qt-animate-pulse qt-bg-white qt-bg-opacity-50 qt-w-12 qt-h-12 qt-rounded-full qt-flex qt-justify-center qt-items-center"
-          >
-            <span class="qt-text-xl qt-font-bold qt-text-white">{{
-              countDown
-            }}</span>
-          </div>
-          <div
-            v-if="!recording && !videoBlob"
-            class="qt-bg-white qt-bg-opacity-95 qt-rounded-lg qt-px-3 qt-py-2.5 qt-mx-8 qt-flex qt-justify-center qt-items-center"
-          >
-            <span class="qt-text-sm qt-font-semibold qt-text-gray-700">
-              {{ currentQuestion.content }}</span
-            >
-          </div>
-        </div>
-      </div>
-    </div>
+    <!--<video-player v-if="videoUrl" :video-src="videoUrl" :height="height" />-->
+    <video-recorder
+      :camera-started="cameraStarted"
+      :current-question="currentQuestion"
+      :height="height"
+      :recording="recording"
+      :rec-start="recStart"
+      :video-blob="videoBlob"
+      :count-down="countDown"
+    />
 
-    <div
-      v-if="!videoBlob && cameraStarted"
-      :class="`qt-border-${color}-600`"
-      class="qt-mt-2 qt-w-full qt-mx-auto qt-max-w-sm qt-border-2 qt-rounded-3xl qt-px-2 qt-py-1.5 qt-flex qt-justify-center qt-space-x-2 qt-items-center"
-    >
-      <div>
-        <button
-          v-if="!recording"
-          :class="`qt-bg-${color}-600 hover:qt-bg-${color}-400 qt-text-white`"
-          class="qt-rounded-full qt-w-6 qt-h-6 qt-flex qt-items-center qt-justify-center"
-          @click="startRecording"
-          disabled
-        >
-          <VideoCameraIcon class="qt-w-4 qt-h-4" />
-        </button>
-        <button
-          v-else
-          :class="`qt-bg-${color}-600 hover:qt-bg-${color}-400 qt-text-white`"
-          class="qt-rounded-full qt-w-6 qt-h-6 qt-flex qt-items-center qt-justify-center"
-          @click="stopRecording"
-          :disabled="!recording"
-        >
-          <span class="qt-block qt-w-2 qt-h-2 qt-bg-white"></span>
-        </button>
-      </div>
-      <div class="qt-relative qt-flex-grow">
-        <span
-          class="qt-block qt-w-full qt-rounded-lg qt-h-1 qt-bg-gray-200"
-        ></span>
-        <span
-          :style="{
-            width: `${width}%`,
-          }"
-          :class="`qt-bg-${color}-600`"
-          class="qt-block qt-w-9 qt-rounded-lg qt-h-1 qt-absolute qt-left-0 qt-top-0 qt-progress-bar"
-        ></span>
-      </div>
-      <div
-        :class="`qt-text-${color}-600`"
-        class="qt-flex qt-justify-between qt-font-semibold qt-text-base qt-w-25 qt-flex-none qt-text-right"
-      >
-        <span>{{ timer }}</span
-        >/ <span>{{ timeLimitString }}</span>
-      </div>
-    </div>
+    <video-actions
+      :recording="recording"
+      :video-blob="videoBlob"
+      :unique-key="uniqueKey"
+      :unique-string="uniqueString"
+      :width="width"
+      :timer="timer"
+      :time-limit-string="timeLimitString"
+      :camera-started="cameraStarted"
+      @start="startRecording"
+      @stop="stopRecording"
+      :file-size="fileSize"
+    />
 
-    <div
-      v-if="videoBlob && cameraStarted"
-      class="qt-mt-2 qt-w-full qt-mx-auto qt-max-w-sm qt-border-2 qt-rounded-3xl qt-px-2 qt-py-1.5 qt-flex qt-space-x-2 qt-items-center"
-      :class="`qt-border-${color}-600`"
-    >
-      <span :class="`qt-text-${color}-600 hover:qt-text-${color}-400`">
-        <CheckCircleIcon class="qt-w-6 qt-h-6" />
-      </span>
-      <div class="qt-flex-grow">
-        <span class="qt-font-semibold qt-text-base qt-text-left"
-          >Video file</span
-        >
-      </div>
-      <span
-        :class="`qt-text-${color}-600`"
-        class="qt-tracking-wider qt-font-semibold qt-text-base qt-w-25 qt-flex-none qt-text-right"
-      >
-        {{ timer }}
-        <!--<a :href="videoBlob" target="_blank" class="qt-link"-->
-        <!--  >view video (temp)</a-->
-        <!--&gt;-->
-      </span>
-    </div>
     <settings @height="useHeight" />
   </div>
 </template>
@@ -124,13 +40,19 @@
 <script>
 import { onMounted, reactive, ref, computed, watch } from "vue";
 import Settings from "../../helpers/Settings";
-import { VideoCameraIcon } from "@heroicons/vue/solid";
-import { CheckCircleIcon } from "@heroicons/vue/outline";
 import AudioRecorder from "audio-recorder-polyfill";
+import { setMicIndicator, unlockAudioContext } from "../../../helpers";
+import uniqueId from "lodash/uniqueId";
+import VideoRecorder from "../../video/VideoRecorder";
+import VideoActions from "../../video/VideoActions";
 
 export default {
   name: "VideoQuestion",
-  components: { Settings, VideoCameraIcon, CheckCircleIcon },
+  components: {
+    VideoActions,
+    VideoRecorder,
+    Settings,
+  },
   props: {
     currentQuestion: {
       type: Object,
@@ -140,20 +62,21 @@ export default {
       type: Object,
       required: true,
     },
+    uniqueKey: {
+      type: String,
+      default: uniqueId(),
+    },
+    uniqueString: {
+      type: String,
+      default: uniqueId(),
+    },
+    lsConstant: {
+      type: String,
+      default: "audioQuality_",
+    },
   },
-  // cameraStream: null,
-  // mediaRecorder: null,
-  // blobsRecorded: [],
-  // recording: false,
-  // timer: '00:00',
-  // timeLimitString: '',
-  // width: 0,
-  // cameraStarted: false,
-  // countDown: 3,
-  // recStart: false,
-  // videoBlob: '',
-  // height: 100,
-  emits: ["answered"],
+
+  emits: ["answered", "no-audio", "quality"],
 
   setup(props, { emit }) {
     props = reactive(props);
@@ -163,6 +86,7 @@ export default {
     const recording = ref(false);
     const cameraStream = ref(null);
     const mediaRecorder = ref(null);
+    const audioContext = ref(null);
     const blobsRecorded = ref([]);
     const width = ref(0);
     const cameraStarted = ref(false);
@@ -170,16 +94,25 @@ export default {
     const videoBlob = ref("");
     const interval = ref(null);
     const interval2 = ref(null);
+    const volumeValues = ref([]);
+    const audioQuality = ref("");
+    const videoUrl = ref("");
+    const fileSize = ref("");
+    const noAudio = ref(false);
+
     const timeLimit = computed(() =>
       props.currentQuestion.time_limit_seconds > 0
         ? props.currentQuestion.time_limit_seconds
         : 30
     );
     const countDown = ref(props.currentQuestion.time_to_prepare);
-
+    watch(audioQuality, (newVal) => {
+      emit("quality", newVal);
+    });
     watch(cameraStarted, () => {
       // console.log("cam started", newValue);
       setTimeout(() => {
+        // setAudioContext();
         startRecording();
       }, 200);
     });
@@ -195,6 +128,12 @@ export default {
       timeLimitString.value = `${minutes < 10 ? "0" + minutes : minutes}:${
         seconds < 10 ? "0" + seconds : seconds
       }`;
+    };
+
+    const setAudioContext = () => {
+      const AudioContext = window.AudioContext || window.webkitAudioContext;
+      audioContext.value = new AudioContext();
+      unlockAudioContext(audioContext.value);
     };
 
     const useHeight = async (pageHeight) => {
@@ -213,14 +152,19 @@ export default {
 
     const startCamera = async () => {
       // console.log("starting video  camera");
+      // await navigator.mediaDevices.enumerateDevices().then((devices) => {
+      //   devices = devices.filter((d) => d.kind === "videoinput");
+      //   console.log(devices);
+      // });
       let video = document.getElementById("video");
       // const videoWidth = video.clientWidth;
       // const videoHeight = video.clientHeight;
       // console.log(videoWidth, videoHeight);
+      console.log(navigator, navigator.mediaDevices);
       navigator.mediaDevices
         .getUserMedia({
           audio: true,
-          video: { width: 640, height: 480, facingMode: "user" },
+          video: { width: 640 / 2, height: 480 / 2, facingMode: "user" },
         })
         .then(async (stream) => {
           cameraStream.value = stream;
@@ -232,6 +176,18 @@ export default {
             console.log(e);
           }
           cameraStarted.value = true;
+          setAudioContext();
+          setMicIndicator(
+            audioContext,
+            stream,
+            recording,
+            props,
+            volumeValues,
+            audioQuality,
+            emit,
+            noAudio
+          );
+          // setMic
           // startRecording();
         })
         .then(
@@ -241,7 +197,7 @@ export default {
             })
         )
         .then(() => {
-          // console.log(video.videoWidth + "x" + video.videoHeight);
+          console.log(video.videoWidth + "x" + video.videoHeight);
         });
     };
 
@@ -257,8 +213,8 @@ export default {
         : "";
       // set MIME type of recording as video/webm
       const options = {
-        audioBitsPerSecond: 128000,
-        videoBitsPerSecond: 2500000,
+        // audioBitsPerSecond: 128000,
+        // videoBitsPerSecond: 2500000,
         mimeType,
       };
       // { mimeType: 'video/webm' }
@@ -282,6 +238,7 @@ export default {
         let videoLocal = URL.createObjectURL(
           new Blob(blobsRecorded.value, { type: "video/webm" })
         );
+        videoUrl.value = videoLocal;
         // console.log(mimeType);
         let videoLocalBlob = new Blob(blobsRecorded.value, {
           type: "video/mp4",
@@ -299,8 +256,19 @@ export default {
         console.log(videoFile);
 
         // console.log(videoLocalBlob)
-        reader.onloadend = function () {
+        reader.onloadend = async function () {
           const base64data = reader.result;
+          var stringLength =
+            base64data.length - `data:${mimeType};base64,`.length;
+
+          var sizeInBytes =
+            4 * Math.ceil(stringLength / 3) * 0.5624896334383812;
+          var sizeInKb = sizeInBytes / 1000;
+          console.log(sizeInKb, sizeInKb * 0.0009765625);
+          console.log(base64data);
+          fileSize.value = `${Number.parseFloat(
+            sizeInKb * 0.0009765625
+          ).toFixed(2)}mb`;
           emit("answered", {
             section_id: props.currentSection.id,
             question_id: props.currentQuestion.id,
@@ -360,6 +328,7 @@ export default {
       const gap = 100 / timeLimit.value;
       width.value = width.value + gap;
     };
+
     return {
       useHeight,
       height,
@@ -376,6 +345,8 @@ export default {
       recording,
       startRecording,
       stopRecording,
+      videoUrl,
+      fileSize,
     };
   },
 };

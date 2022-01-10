@@ -11,7 +11,9 @@ module.exports = {
         18: "4.5rem",
         25: "6.25rem",
       },
-
+      blur: {
+        xs: "2px",
+      },
       fontFamily: {
         sans: ["Montserrat", ...defaultTheme.fontFamily.sans],
       },

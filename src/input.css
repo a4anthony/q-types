@@ -116,3 +116,7 @@
   left: 19px;
   animation-duration: 458ms;
 }
+
+.qt-alert-info .alert-info {
+  padding: 0 !important;
+}

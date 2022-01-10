@@ -30,6 +30,8 @@ const Template = (args) => ({
     answered: action("answered"),
     startTime: action("start-time"),
     resetAnswer: action("reset-answer"),
+    noAudio: action("no-audio"),
+    quality: action("quality"),
   },
 
   // And then the `args` are bound to your component with `v-bind="args"`
@@ -40,6 +42,8 @@ const Template = (args) => ({
     "@start-time='startTime'" +
     " @reset-answer='resetAnswer' " +
     "@answered='answered' " +
+    "@noAudio='no-audio' " +
+    "@quality='quality' " +
     "v-bind='args'  />" +
     "</question-wrapper>",
 });
@@ -49,8 +53,8 @@ videoOnly.args = {
   currentQuestion: {
     ...data.question,
     content: "Tell us about your favourite holiday.",
-    time_limit_seconds: 30,
-    time_to_prepare: 10,
+    time_limit_seconds: 60,
+    time_to_prepare: 3,
   },
   options: data.blankSpaceOptions,
   currentSection: data.section,

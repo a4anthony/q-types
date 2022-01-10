@@ -17,7 +17,7 @@
       retry ({{ attempts }}/ {{ totalAttempts }})
     </button>
     <div
-      v-else
+      v-if="attempts > totalAttempts && !showLink"
       class="focus:qt-outline-none qt-inline-flex qt-justify-center qt-items-center qt-text-sm qt-font-semibold"
     >
       Go here<a
@@ -28,6 +28,18 @@
       >
       to troubleshoot.
     </div>
+  </div>
+  <div
+    v-if="showLink"
+    class="qt-text-center qt-w-full focus:qt-outline-none qt-inline-flex qt-justify-center qt-items-center qt-text-sm qt-font-semibold"
+  >
+    Go here<a
+      class="qt-text-blue-500 hover:qt-text-blue-400 qt-inline-flex qt-mx-1"
+      target="_blank"
+      :href="link || '#'"
+      >here</a
+    >
+    to troubleshoot.
   </div>
 </template>
 
@@ -48,6 +60,10 @@ export default {
       type: Boolean,
       default: true,
     },
+    showLink: {
+      type: Boolean,
+      default: false,
+    },
     helpMsg: {
       type: String,
       default: "",
@@ -58,6 +74,9 @@ export default {
     },
     link: String,
   },
+
+  emits: ["retry"],
+
   setup(props) {
     const spin = ref(false);
     watch(
@@ -66,7 +85,6 @@ export default {
         spin.value = val;
       }
     );
-
     return {
       spin,
     };
