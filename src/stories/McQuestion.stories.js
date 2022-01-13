@@ -68,3 +68,18 @@ Single.args = {
 Single.parameters = {
   layout: "fullscreen",
 };
+
+export const LongText = Template.bind({});
+LongText.args = {
+  options: data.blankSpaceOptions,
+  currentQuestion: {
+    ...data.question,
+    content:
+      "The mobile #SELECT# business, Call King, made more money than expected last year. They have now upgraded their profit expectations for this year. The #SELECT# said revenue in its retail shops grew 25%. It also said that new subscriptions have grown by #SELECT#. Subscriptions are now #SELECT# King’s most profitable department. Call King founder, Nicolette Brown, is a #SELECT# woman." +
+      " The mobile #SELECT# business, Call King, made more money than expected last year. They have now upgraded their profit expectations for this year. The #SELECT# said revenue in its retail shops grew 25%. It also said that new subscriptions have grown by #SELECT#. Subscriptions are now #SELECT# King’s most profitable department. Call King founder, Nicolette Brown, is a #SELECT# woman.",
+  },
+  currentSection: data.section,
+};
+LongText.parameters = {
+  layout: "fullscreen",
+};

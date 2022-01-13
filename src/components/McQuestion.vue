@@ -2,14 +2,14 @@
   <div
     class="qt-h-full qt-flex qt-items-center qt-w-full sm:qt-w-auto qt-justify-center qt-mx-auto"
   >
-    <div class="qt-w-full sm:qt-w-auto">
+    <div :class="overflow ? 'qt-h-full' : ''" class="qt-w-full sm:qt-w-auto">
       <h1 class="qt-hidden">{{ counter }}</h1>
       <div
         class="qt-leading-loose qt-relative qt-space-x-2 qt-justify-start qt-text-left qt-text-base qt-font-medium"
       >
         <span v-html="htmlText"></span>
       </div>
-      <div :class="stickyBottom ? `sticky bottom-0` : ''">
+      <div :class="stickyBottom ? `sticky bottom-0` : ''" class="qt-pb-2">
         <mc-options
           ref="mcOptions"
           @set-answer="setAnswer"
@@ -19,6 +19,7 @@
         />
       </div>
     </div>
+    <settings @overflow="setOverflow" />
   </div>
 </template>
 
@@ -26,10 +27,11 @@
 import { onMounted, reactive, ref, watch } from "vue";
 import McOptions from "./helpers/McOptions.vue";
 import _ from "lodash";
+import Settings from "./helpers/Settings";
 
 export default {
   name: "McQuestion",
-  components: { McOptions },
+  components: { Settings, McOptions },
   props: {
     fullQuestion: {
       type: Boolean,
@@ -82,6 +84,7 @@ export default {
     let selectedAnswers = ref([]);
     const mcOptions = ref(null);
     const overElm = ref(null);
+    const overflow = ref(false);
 
     watch(blankSpaces, (currentValue) => {
       let sampleAnswers = [];
@@ -246,13 +249,19 @@ export default {
     const removeAnswer = (value, reset = true) => {
       // show option in dock
       props.options.forEach((answer, index) => {
+        const optionRef =
+          mcOptions.value.$refs[`option${index}Ref`].length > 0
+            ? mcOptions.value.$refs[`option${index}Ref`][0]
+            : mcOptions.value.$refs[`option${index}Ref`];
+        const optionRefSm =
+          mcOptions.value.$refs[`option${index}RefSm`].length > 0
+            ? mcOptions.value.$refs[`option${index}RefSm`][0]
+            : mcOptions.value.$refs[`option${index}RefSm`];
+
         if (value === answer.content) {
-          mcOptions.value.$refs[`option${index}Ref`].classList.remove(
-            "qt-hidden"
-          );
-          mcOptions.value.$refs[`option${index}RefSm`].classList.remove(
-            "qt-hidden"
-          );
+          [optionRef, optionRefSm].forEach((elm) => {
+            elm.classList.remove("qt-hidden");
+          });
         }
       });
       if (!reset) {
@@ -271,6 +280,15 @@ export default {
 
     const setAnswer = (answerIndex, preIndex = null) => {
       const value = props.options[answerIndex].content;
+      const optionRef =
+        mcOptions.value.$refs[`option${answerIndex}Ref`].length > 0
+          ? mcOptions.value.$refs[`option${answerIndex}Ref`][0]
+          : mcOptions.value.$refs[`option${answerIndex}Ref`];
+      const optionRefSm =
+        mcOptions.value.$refs[`option${answerIndex}RefSm`].length > 0
+          ? mcOptions.value.$refs[`option${answerIndex}RefSm`][0]
+          : mcOptions.value.$refs[`option${answerIndex}RefSm`];
+
       let reset = false;
 
       if (preIndex) {
@@ -294,24 +312,19 @@ export default {
             selectedAnswers.value[index] = value;
           }
           valueAlreadyAssigned = true;
-          mcOptions.value.$refs[`option${answerIndex}Ref`].classList.add(
-            "qt-hidden"
-          );
-          mcOptions.value.$refs[`option${answerIndex}RefSm`].classList.add(
-            "qt-hidden"
-          );
+
+          [optionRef, optionRefSm].forEach((elm) => {
+            elm.classList.add("qt-hidden");
+          });
         }
 
         if (selectedAnswers.value.length === 1) {
           if (selectedAnswers.value[0] !== value) {
             removeAnswer(selectedAnswers.value[0], false);
             selectedAnswers.value[index] = value;
-            mcOptions.value.$refs[`option${answerIndex}Ref`].classList.add(
-              "qt-hidden"
-            );
-            mcOptions.value.$refs[`option${answerIndex}RefSm`].classList.add(
-              "qt-hidden"
-            );
+            [optionRef, optionRefSm].forEach((elm) => {
+              elm.classList.add("qt-hidden");
+            });
             reset = true;
           }
         }
@@ -347,6 +360,11 @@ export default {
 
       emit("answer", selectedAnswers.value);
     };
+
+    const setOverflow = (val) => {
+      overflow.value = val;
+    };
+
     return {
       blankSpaces,
       onClick() {
@@ -360,6 +378,8 @@ export default {
       removeAnswer,
       overElm,
       counter,
+      overflow,
+      setOverflow,
     };
   },
 };

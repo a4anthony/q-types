@@ -7,7 +7,7 @@ import { onMounted, ref } from "vue";
 
 export default {
   name: "Settings",
-  emits: ["height"],
+  emits: ["height", "overflow"],
   setup(_, { emit }) {
     const height = ref("");
     onMounted(() => {
@@ -17,6 +17,7 @@ export default {
         // since we are observing only a single element, so we access the first element in entries array
         let rect = entries[0].contentRect;
         height.value = `${rect.height}px`;
+        emit("overflow", isOverflown());
         emit("height", height.value);
       });
       resize_ob.observe(document.getElementById("qtContent"));
@@ -28,6 +29,19 @@ export default {
         emit("height", height.value);
       }, 200);
     };
+
+    const isOverflown = () => {
+      const element = document.getElementById("qtContentScroll");
+      console.log(
+        element.scrollHeight > element.clientHeight ||
+          element.scrollWidth > element.clientWidth
+      );
+      return (
+        element.scrollHeight > element.clientHeight ||
+        element.scrollWidth > element.clientWidth
+      );
+    };
+
     return {
       height,
     };

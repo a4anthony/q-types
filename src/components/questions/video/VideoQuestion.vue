@@ -206,13 +206,19 @@ export default {
         window.MediaRecorder = AudioRecorder;
       }
 
-      const mimeType = MediaRecorder.isTypeSupported("video/mp4")
-        ? "video/mp4"
-        : MediaRecorder.isTypeSupported("video/webm")
-        ? "video/webm"
-        : "";
+      let mimeType = "";
+      if (MediaRecorder.isTypeSupported("video/webm;codecs=vp9")) {
+        mimeType = "video/webm; codecs=vp9";
+      } else if (MediaRecorder.isTypeSupported("video/webm;codecs=vp8")) {
+        mimeType = "video/webm; codecs=vp8";
+      } else if (MediaRecorder.isTypeSupported("video/mp4")) {
+        mimeType = "video/mp4";
+      }
+
       // set MIME type of recording as video/webm
       const options = {
+        audioBitsPerSecond: 128 * 1000, // 128 kbit/s
+        videoBitsPerSecond: 2 * 1000 * 1000, // 2 Mbit/s
         // audioBitsPerSecond: 128000,
         // videoBitsPerSecond: 2500000,
         mimeType,
