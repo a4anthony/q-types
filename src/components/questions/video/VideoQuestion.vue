@@ -31,6 +31,10 @@
       @start="startRecording"
       @stop="stopRecording"
       :file-size="fileSize"
+      :upload-progress="uploadPercentage"
+      :upload-error="uploadError"
+      :upload-success="uploadSuccess"
+      @retry-upload="uploadFileToS3"
     />
 
     <settings @height="useHeight" />
@@ -45,6 +49,7 @@ import { setMicIndicator, unlockAudioContext } from "../../../helpers";
 import uniqueId from "lodash/uniqueId";
 import VideoRecorder from "../../video/VideoRecorder";
 import VideoActions from "../../video/VideoActions";
+import axios from "axios";
 
 export default {
   name: "VideoQuestion",
@@ -74,6 +79,10 @@ export default {
       type: String,
       default: "audioQuality_",
     },
+    storageUrl: {
+      type: String,
+      default: "https://teq.test/api/test/side-load/2f5f99c/1695",
+    },
   },
 
   emits: ["answered", "no-audio", "quality"],
@@ -98,7 +107,13 @@ export default {
     const audioQuality = ref("");
     const videoUrl = ref("");
     const fileSize = ref("");
+    const storageTempUrl = ref("");
+    const storageTempFileName = ref("");
+    const uploadPercentage = ref(0);
+    const uploadError = ref(false);
+    const uploadSuccess = ref(false);
     const noAudio = ref(false);
+    const videoFile = ref(null);
 
     const timeLimit = computed(() =>
       props.currentQuestion.time_limit_seconds > 0
@@ -119,6 +134,7 @@ export default {
     onMounted(() => {
       // countDown.value = props.currentQuestion.time_to_prepare;
       setInitialTime();
+      getStorageUrl();
     });
 
     const setInitialTime = () => {
@@ -160,11 +176,18 @@ export default {
       // const videoWidth = video.clientWidth;
       // const videoHeight = video.clientHeight;
       // console.log(videoWidth, videoHeight);
-      console.log(navigator, navigator.mediaDevices);
+      // console.log(navigator, navigator.mediaDevices);
       navigator.mediaDevices
         .getUserMedia({
           audio: true,
-          video: { width: 640 / 2, height: 480 / 2, facingMode: "user" },
+          // video: { width: 640 / 2, height: 480 / 2, facingMode: "user" },
+          video: {
+            width: { min: 320 / 2, ideal: 320 / 2 },
+            height: { min: 240 / 2, ideal: 240 / 2 },
+            aspectRatio: 3 / 2,
+            frameRate: { exact: 10 },
+            facingMode: "user",
+          },
         })
         .then(async (stream) => {
           cameraStream.value = stream;
@@ -207,20 +230,22 @@ export default {
       }
 
       let mimeType = "";
-      if (MediaRecorder.isTypeSupported("video/webm;codecs=vp9")) {
+      if (MediaRecorder.isTypeSupported("video/webm;codecs=h264")) {
+        mimeType = "video/webm;codecs=h264";
+      } else if (MediaRecorder.isTypeSupported("video/webm;codecs=vp9")) {
         mimeType = "video/webm; codecs=vp9";
       } else if (MediaRecorder.isTypeSupported("video/webm;codecs=vp8")) {
         mimeType = "video/webm; codecs=vp8";
-      } else if (MediaRecorder.isTypeSupported("video/mp4")) {
-        mimeType = "video/mp4";
       }
-
+      console.log(mimeType);
+      // alert(mimeType);
+      console.log(MediaRecorder.isTypeSupported("video/webm;codecs=h264"));
       // set MIME type of recording as video/webm
       const options = {
-        audioBitsPerSecond: 128 * 1000, // 128 kbit/s
-        videoBitsPerSecond: 2 * 1000 * 1000, // 2 Mbit/s
-        // audioBitsPerSecond: 128000,
-        // videoBitsPerSecond: 2500000,
+        // audioBitsPerSecond: 128 * 1000, // 128 kbit/s
+        // videoBitsPerSecond: 2 * 1000 * 1000, // 2 Mbit/s
+        audioBitsPerSecond: 128000 / 4,
+        videoBitsPerSecond: 2500000 / 4,
         mimeType,
       };
       // { mimeType: 'video/webm' }
@@ -241,48 +266,38 @@ export default {
       // event : recording stopped & all blobs sent
       mediaRecorder.value.addEventListener("stop", function () {
         // create local object URL from the recorded video blobs
-        let videoLocal = URL.createObjectURL(
-          new Blob(blobsRecorded.value, { type: "video/webm" })
-        );
-        videoUrl.value = videoLocal;
-        // console.log(mimeType);
         let videoLocalBlob = new Blob(blobsRecorded.value, {
-          type: "video/mp4",
+          type: "video/webm",
         });
+        let videoLocal = URL.createObjectURL(videoLocalBlob);
+        videoUrl.value = videoLocal;
+
         // console.log(videoLocal)
         videoBlob.value = videoLocal;
         recording.value = false;
         const reader = new FileReader();
         reader.readAsDataURL(videoLocalBlob);
 
-        const videoFile = new File([videoLocalBlob], "video/mp4", {
+        videoFile.value = new File([videoLocalBlob], "video/webm", {
           type: videoLocalBlob.type,
         });
+        console.log(videoFile.value);
+        console.log(videoLocalBlob.size, videoLocalBlob.size * 0.000001);
+        fileSize.value = `${Number.parseFloat(
+          videoLocalBlob.size * 0.000001
+        ).toFixed(2)}mb`;
 
-        console.log(videoFile);
-
-        // console.log(videoLocalBlob)
+        uploadFileToS3(videoFile.value);
         reader.onloadend = async function () {
           const base64data = reader.result;
-          var stringLength =
-            base64data.length - `data:${mimeType};base64,`.length;
-
-          var sizeInBytes =
-            4 * Math.ceil(stringLength / 3) * 0.5624896334383812;
-          var sizeInKb = sizeInBytes / 1000;
-          console.log(sizeInKb, sizeInKb * 0.0009765625);
-          console.log(base64data);
-          fileSize.value = `${Number.parseFloat(
-            sizeInKb * 0.0009765625
-          ).toFixed(2)}mb`;
-          emit("answered", {
-            section_id: props.currentSection.id,
-            question_id: props.currentQuestion.id,
-            video_blob: base64data,
-            video_blob_2: videoLocalBlob,
-            video_file: videoFile,
-          });
-          // console.log(base64data)
+          // console.log(base64data);
+          // emit("answered", {
+          //   section_id: props.currentSection.id,
+          //   question_id: props.currentQuestion.id,
+          //   video_blob: base64data,
+          //   video_blob_2: videoLocalBlob,
+          //   video_file: videoFile.value,
+          // });
         };
         // download_link.href = video_local;
       });
@@ -334,7 +349,86 @@ export default {
       const gap = 100 / timeLimit.value;
       width.value = width.value + gap;
     };
-
+    /**
+     * Get storage url
+     */
+    const getStorageUrl = () => {
+      fetch(props.storageUrl)
+        .then((response) => response.json())
+        .then((data) => {
+          console.log(data);
+          storageTempUrl.value = data.url;
+          storageTempFileName.value = data.fileName;
+        });
+    };
+    /**
+     * Upload to s3
+     */
+    const uploadFileToS3 = async () => {
+      const formData = new FormData();
+      formData.append("file", videoFile.value, videoFile.value.name);
+      uploadError.value = false;
+      uploadPercentage.value = 0;
+      onProgress(0);
+      axios
+        .put(storageTempUrl.value, formData, {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+          onUploadProgress: function (progressEvent) {
+            // console.log(progressEvent);
+            const parseValue = parseInt(
+              Math.round((progressEvent.loaded / progressEvent.total) * 100)
+            );
+            uploadPercentage.value = parseValue;
+            onProgress(parseValue);
+          }.bind(this),
+        })
+        .then(function () {
+          console.log("SUCCESS!!");
+          onProgress(100, true);
+          uploadError.value = false;
+          uploadSuccess.value = true;
+          emit("answered", {
+            section_id: props.currentSection.id,
+            question_id: props.currentQuestion.id,
+            video_key: storageTempFileName.value,
+          });
+        })
+        .catch(function () {
+          console.log("FAILURE!!");
+          uploadError.value = true;
+        });
+    };
+    /**
+     * On upload progress
+     * @param value
+     * @param success
+     */
+    const onProgress = (value, success = false) => {
+      const progressBars = document.querySelectorAll(".qt-upload-progress");
+      const progressPercentage = document.querySelectorAll(
+        ".qt-upload-progress-percentage"
+      );
+      for (let i = 0; i < progressBars.length; i++) {
+        if (uploadPercentage.value < 100) {
+          // console.log("less", value);
+          progressBars[i].style.width = value + "%";
+        }
+        if (success) {
+          progressBars[i].style.width = value + "%";
+        }
+      }
+      for (let i = 0; i < progressPercentage.length; i++) {
+        if (uploadPercentage.value < 100) {
+          // console.log("less", value);
+          progressPercentage[i].innerText = value + "%";
+        }
+        if (success) {
+          progressPercentage[i].innerText = value + "%";
+        }
+      }
+    };
     return {
       useHeight,
       height,
@@ -353,6 +447,11 @@ export default {
       stopRecording,
       videoUrl,
       fileSize,
+      uploadPercentage,
+      uploadError,
+      uploadSuccess,
+      uploadFileToS3,
+      videoFile,
     };
   },
 };

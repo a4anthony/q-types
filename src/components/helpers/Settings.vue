@@ -32,10 +32,10 @@ export default {
 
     const isOverflown = () => {
       const element = document.getElementById("qtContentScroll");
-      console.log(
-        element.scrollHeight > element.clientHeight ||
-          element.scrollWidth > element.clientWidth
-      );
+      // console.log(
+      //   element.scrollHeight > element.clientHeight ||
+      //     element.scrollWidth > element.clientWidth
+      // );
       return (
         element.scrollHeight > element.clientHeight ||
         element.scrollWidth > element.clientWidth
