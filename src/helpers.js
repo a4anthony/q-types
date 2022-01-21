@@ -117,8 +117,10 @@ const checkAudioQuality = (arr, audioQuality, props, emit, noAudio) => {
   if (audioQuality.value) {
     localStorage.setItem(props.lsConstant, audioQuality.value);
   }
-  noAudio.value = arr.filter((x) => x !== 0).length === 0;
-  emit("no-audio", noAudio.value);
+  localStorage.setItem(
+    `${props.lsConstant}_noAudioCheck`,
+    (noAudio.value = arr.filter((x) => x !== 0).length === 0).toString()
+  );
 };
 
 export const unlockAudioContext = (audioCtx) => {

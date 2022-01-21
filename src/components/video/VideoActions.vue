@@ -94,21 +94,6 @@
         ></div>
       </div>
     </div>
-
-    <!--<span :class="`qt-text-${color}-600 hover:qt-text-${color}-400`">-->
-    <!--  <CheckCircleIcon class="qt-w-6 qt-h-6" />-->
-    <!--</span>-->
-    <!--<div class="qt-flex-grow">-->
-    <!--  <span class="qt-font-semibold qt-text-base qt-text-left">Video file</span>-->
-    <!--</div>-->
-    <!--<span-->
-    <!--  :class="`qt-text-${color}-600`"-->
-    <!--  class="qt-tracking-wider qt-font-semibold qt-text-base qt-w-25 qt-flex-none qt-text-right"-->
-    <!--&gt;-->
-    <!--  {{ timer }}-->
-    <!--  &lt;!&ndash;<a :href="videoBlob" target="_blank" class="qt-link">view video (temp)</a>&ndash;&gt;-->
-    <!--</span>-->
-    <!--<span>{{ fileSize }}</span>-->
   </div>
   <!--v-if="videoBlob && cameraStarted && uploadError"-->
   <div v-if="videoBlob && cameraStarted && uploadError" class="qt-mt-4">

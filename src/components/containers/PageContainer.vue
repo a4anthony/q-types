@@ -71,7 +71,7 @@
 </template>
 
 <script>
-import { onMounted, ref } from "vue";
+import { onMounted, onUnmounted, ref } from "vue";
 import { ArrowDownIcon } from "@heroicons/vue/outline";
 import { ArrowUpIcon } from "@heroicons/vue/outline";
 export default {
@@ -105,10 +105,16 @@ export default {
       resize_ob.observe(document.getElementById("qtFooter"));
     });
 
+    onUnmounted(() => {});
+
     const setHeight = () => {
       const wHeight = window.innerHeight;
-      const navHeight = document.getElementById("qtNavbar").clientHeight;
-      let footerHeight = document.getElementById("qtFooter").clientHeight;
+      const navHeight = document.getElementById("qtNavbar")
+        ? document.getElementById("qtNavbar").clientHeight
+        : 100;
+      let footerHeight = document.getElementById("qtFooter")
+        ? document.getElementById("qtFooter").clientHeight
+        : 100;
       // if (document.getElementById("qtPageContainerFooter")) {
       //   footerHeight = document.getElementById(
       //     "qtPageContainerFooter"

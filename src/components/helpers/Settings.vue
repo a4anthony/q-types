@@ -20,22 +20,25 @@ export default {
         emit("overflow", isOverflown());
         emit("height", height.value);
       });
-      resize_ob.observe(document.getElementById("qtContent"));
+      if (document.getElementById("qtContent")) {
+        resize_ob.observe(document.getElementById("qtContent"));
+      }
     });
 
     const getHeight = () => {
       setTimeout(() => {
-        height.value = `${document.getElementById("qtContent").clientHeight}px`;
+        height.value = document.getElementById("qtContent")
+          ? `${document.getElementById("qtContent").clientHeight}px`
+          : "800px";
         emit("height", height.value);
       }, 200);
     };
 
     const isOverflown = () => {
       const element = document.getElementById("qtContentScroll");
-      // console.log(
-      //   element.scrollHeight > element.clientHeight ||
-      //     element.scrollWidth > element.clientWidth
-      // );
+      if (!element) {
+        return false;
+      }
       return (
         element.scrollHeight > element.clientHeight ||
         element.scrollWidth > element.clientWidth
