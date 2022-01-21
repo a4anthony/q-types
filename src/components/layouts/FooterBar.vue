@@ -25,7 +25,7 @@
         <div class="qt-flex-grow qt-flex qt-justify-end sm:qt-justify-center">
           <span
             class="qt-text-center qt-flex qt-items-center qt-justify-center qt-text-xs qt-text-gray-500 qt-font-medium"
-            >© 2021
+            >© {{ new Date().getFullYear() }}
             <span class="qt-inline-flex qt-mx-1">The English Quiz</span>
             |
             <a

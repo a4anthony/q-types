@@ -18,4 +18,4 @@ cd ~/www/teq/
 
 npm i q-types-module-1.0.5.tgz
 
-npm run prod
+npm run dev
