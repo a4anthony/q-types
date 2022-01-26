@@ -36,7 +36,7 @@
 </template>
 
 <script>
-import { onMounted, reactive, ref } from "vue";
+import { reactive, ref } from "vue";
 import Settings from "../../helpers/Settings";
 // import AudioRecorder from "audio-recorder-polyfill";
 // import { setMicIndicator, unlockAudioContext } from "../../../helpers";
