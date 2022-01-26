@@ -1,12 +1,13 @@
 <template>
   <div class="qt-flex qt-flex-col qt-h-full qt-justify-center qt-items-center">
-    <div
-      id="videoQuestionContent"
-      class="qt-py-2.5 qt-audio-question-content qt-font-semibold"
-      :class="recording || videoFile ? 'qt-visible' : 'qt-invisible'"
-    >
-      {{ currentQuestion.content }}
-    </div>
+    <!--<div-->
+    <!--  id="videoQuestionContent"-->
+    <!--  class="qt-py-2.5 qt-audio-question-content qt-font-semibold"-->
+    <!--  :class="recording || videoFile ? 'qt-visible' : 'qt-invisible'"-->
+    <!--&gt;-->
+    <!--  {{ currentQuestion.content }}-->
+    <!--</div>-->
+    <span id="videoQuestionContent"></span>
     <video-recorder-rtc
       @video-file="setVideoFile"
       :current-question="currentQuestion"
@@ -16,6 +17,12 @@
           this.recording = val;
         }
       "
+      @mime-type="
+        (val) => {
+          this.mimeType = val;
+        }
+      "
+      @get-storage-url="getStorageUrl"
     />
     <video-upload
       v-if="videoFile"
@@ -24,35 +31,6 @@
       :upload-error="uploadError"
       @retry-upload="uploadFileToS3"
     />
-    <!--<video-player v-if="videoUrl" :video-src="videoUrl" :height="height" />-->
-    <!--<video-recorder-->
-    <!--  :camera-started="cameraStarted"-->
-    <!--  :current-question="currentQuestion"-->
-    <!--  :height="height"-->
-    <!--  :recording="recording"-->
-    <!--  :rec-start="recStart"-->
-    <!--  :video-blob="videoBlob"-->
-    <!--  :count-down="countDown"-->
-    <!--/>-->
-
-    <!--<video-actions-->
-    <!--  :recording="recording"-->
-    <!--  :video-blob="videoBlob"-->
-    <!--  :unique-key="uniqueKey"-->
-    <!--  :unique-string="uniqueString"-->
-    <!--  :width="width"-->
-    <!--  :timer="timer"-->
-    <!--  :time-limit-string="timeLimitString"-->
-    <!--  :camera-started="cameraStarted"-->
-    <!--  @start="startRecording"-->
-    <!--  @stop="stopRecording"-->
-    <!--  :file-size="fileSize"-->
-    <!--  :upload-progress="uploadPercentage"-->
-    <!--  :upload-error="uploadError"-->
-    <!--  :upload-success="uploadSuccess"-->
-    <!--  @retry-upload="uploadFileToS3"-->
-    <!--/>-->
-
     <settings @height="useHeight" />
   </div>
 </template>
@@ -97,7 +75,11 @@ export default {
     },
     storageUrl: {
       type: String,
-      default: "https://teq.test/api/test/side-load/2f5f99c/1695",
+      default: "https://teq.test/api/test/side-load",
+    },
+    publicId: {
+      type: String,
+      default: "2f5f99c",
     },
   },
 
@@ -130,236 +112,36 @@ export default {
     const uploadSuccess = ref(false);
     // const noAudio = ref(false);
     const videoFile = ref(null);
+    const mimeType = ref("");
 
-    // const timeLimit = computed(() =>
-    //   props.currentQuestion.time_limit_seconds > 0
-    //     ? props.currentQuestion.time_limit_seconds
-    //     : 30
-    // );
-    // const countDown = ref(props.currentQuestion.time_to_prepare);
-    // watch(audioQuality, (newVal) => {
-    //   emit("quality", newVal);
-    // });
-    // watch(cameraStarted, () => {
-    //   // console.log("cam started", newValue);
-    //   setTimeout(() => {
-    //     // setAudioContext();
-    //     startRecording();
-    //   }, 200);
-    // });
-    onMounted(() => {
-      // countDown.value = props.currentQuestion.time_to_prepare;
-      // setInitialTime();
-      getStorageUrl();
-    });
-    //
-    // const setInitialTime = () => {
-    //   const time = timeLimit.value;
-    //   const minutes = Math.floor(time / 60);
-    //   const seconds = time - minutes * 60;
-    //   timeLimitString.value = `${minutes < 10 ? "0" + minutes : minutes}:${
-    //     seconds < 10 ? "0" + seconds : seconds
-    //   }`;
-    // };
-    //
-    // const setAudioContext = () => {
-    //   const AudioContext = window.AudioContext || window.webkitAudioContext;
-    //   audioContext.value = new AudioContext();
-    //   unlockAudioContext(audioContext.value);
-    // };
-    //
     const useHeight = async (pageHeight) => {
       const formattedHeight = Number(pageHeight.replace("px", ""));
       if (document.getElementById("videoQuestionContent")) {
         height.value =
           formattedHeight -
           document.getElementById("videoQuestionContent").clientHeight -
+          100 -
           100;
       }
     };
-    //
-    // const startCamera = async () => {
-    //   // console.log("starting video  camera");
-    //   // await navigator.mediaDevices.enumerateDevices().then((devices) => {
-    //   //   devices = devices.filter((d) => d.kind === "videoinput");
-    //   //   console.log(devices);
-    //   // });
-    //   let video = document.getElementById("video");
-    //   // const videoWidth = video.clientWidth;
-    //   // const videoHeight = video.clientHeight;
-    //   // console.log(videoWidth, videoHeight);
-    //   // console.log(navigator, navigator.mediaDevices);
-    //   navigator.mediaDevices
-    //     .getUserMedia({
-    //       audio: true,
-    //       // video: { width: 640 / 2, height: 480 / 2, facingMode: "user" },
-    //       // video: { width: 640 / 2, height: 480 / 2, facingMode: "user" },
-    //       video: {
-    //         width: { min: 320 / 2, ideal: 320 / 2 },
-    //         height: { min: 240 / 2, ideal: 240 / 2 },
-    //         aspectRatio: 3 / 2,
-    //         frameRate: { exact: 10 },
-    //         facingMode: "user",
-    //       },
-    //     })
-    //     .then(async (stream) => {
-    //       cameraStream.value = stream;
-    //       video.srcObject = stream;
-    //       video.muted = true;
-    //       try {
-    //         await video.play();
-    //       } catch (e) {
-    //         console.log(e);
-    //       }
-    //       cameraStarted.value = true;
-    //       setAudioContext();
-    //       setMicIndicator(
-    //         audioContext,
-    //         stream,
-    //         recording,
-    //         props,
-    //         volumeValues,
-    //         audioQuality,
-    //         emit,
-    //         noAudio
-    //       );
-    //     })
-    //     .then(
-    //       () =>
-    //         new Promise((resolve) => {
-    //           video.onloadedmetadata = resolve;
-    //         })
-    //     )
-    //     .then(() => {
-    //       console.log(video.videoWidth + "x" + video.videoHeight);
-    //     })
-    //     .catch((err) => {
-    //       console.log("camera error is :" + err);
-    //     });
-    // };
-    //
-    // const startRecording = async () => {
-    //   if (!window.MediaRecorder) {
-    //     window.MediaRecorder = AudioRecorder;
-    //   }
-    //
-    //   let mimeType = "video/webm;codecs=vp8";
-    //   if (MediaRecorder.isTypeSupported("video/webm;codecs=h264")) {
-    //     mimeType = "video/webm;codecs=h264";
-    //   } else if (MediaRecorder.isTypeSupported("video/webm;codecs=vp9")) {
-    //     mimeType = "video/webm;codecs=vp9";
-    //   } else if (MediaRecorder.isTypeSupported("video/webm;codecs=vp8")) {
-    //     mimeType = "video/webm;codecs=vp8";
-    //   } else if (MediaRecorder.isTypeSupported("video/webm")) {
-    //     mimeType = "video/webm";
-    //   } else if (MediaRecorder.isTypeSupported("video/mp4")) {
-    //     mimeType = "video/mp4";
-    //   }
-    //   console.log(mimeType);
-    //   console.log(MediaRecorder.isTypeSupported("video/webm;codecs=h264"));
-    //   // set MIME type of recording as video/webm
-    //   const options = {
-    //     audioBitsPerSecond: 128000,
-    //     videoBitsPerSecond: 2500000,
-    //     mimeType,
-    //   };
-    //   mediaRecorder.value = new MediaRecorder(cameraStream.value, options);
-    //
-    //   mediaRecorder.value.addEventListener("start", () => {
-    //     console.log("recording started");
-    //     recording.value = true;
-    //     recStart.value = false;
-    //     setTimer();
-    //   });
-    //
-    //   // event : new recorded video blob available
-    //   mediaRecorder.value.addEventListener("dataavailable", function (e) {
-    //     blobsRecorded.value.push(e.data);
-    //   });
-    //
-    //   // event : recording stopped & all blobs sent
-    //   mediaRecorder.value.addEventListener("stop", function () {
-    //     // create local object URL from the recorded video blobs
-    //     let videoLocalBlob = new Blob(blobsRecorded.value, {
-    //       type: mimeType,
-    //     });
-    //     let videoLocal = URL.createObjectURL(videoLocalBlob);
-    //     videoUrl.value = videoLocal;
-    //
-    //     videoBlob.value = videoLocal;
-    //     recording.value = false;
-    //     const reader = new FileReader();
-    //     reader.readAsDataURL(videoLocalBlob);
-    //
-    //     videoFile.value = new File([videoLocalBlob], "answer_video", {
-    //       type: videoLocalBlob.type,
-    //     });
-    //     console.log(videoFile.value);
-    //     console.log(JSON.stringify(videoFile.value));
-    //     console.log(videoLocalBlob.size, videoLocalBlob.size * 0.000001);
-    //     fileSize.value = `${Number.parseFloat(
-    //       videoLocalBlob.size * 0.000001
-    //     ).toFixed(2)}mb`;
-    //     uploadFileToS3(videoFile.value);
-    //   });
-    //
-    //   recStart.value = true;
-    //   width.value = 0;
-    //   timer.value = "00:00";
-    //   videoBlob.value = "";
-    //   setInitialTime();
-    //   interval.value = setInterval(() => {
-    //     if (countDown.value === 1) {
-    //       // start recording with each recorded blob having 1 second video
-    //       mediaRecorder.value.start(1000);
-    //       clearInterval(interval.value);
-    //     } else {
-    //       countDown.value = countDown.value - 1;
-    //     }
-    //   }, 1100);
-    // };
-    //
-    // const stopRecording = () => {
-    //   if (mediaRecorder.value && mediaRecorder.value.state !== "inactive") {
-    //     mediaRecorder.value.stop();
-    //   }
-    //   countDown.value = 3;
-    //   clearInterval(interval2.value);
-    // };
-    // const setTimer = () => {
-    //   let time = 0;
-    //   timer.value = "00:00";
-    //   interval2.value = setInterval(() => {
-    //     if (!recording.value) {
-    //       return;
-    //     }
-    //     time = time + 1;
-    //     setWidth();
-    //     const minutes = Math.floor(time / 60);
-    //     const seconds = time - minutes * 60;
-    //     let minString = minutes > 9 ? minutes : `0${minutes}`;
-    //     let secsString = seconds > 9 ? seconds : `0${seconds}`;
-    //     timer.value = `${minString}:${secsString}`;
-    //     if (time === timeLimit.value) {
-    //       stopRecording();
-    //       clearInterval(interval2.value);
-    //     }
-    //   }, 1000);
-    // };
-    // const setWidth = () => {
-    //   const gap = 100 / timeLimit.value;
-    //   width.value = width.value + gap;
-    // };
     /**
      * Get storage url
      */
     const getStorageUrl = () => {
-      fetch(props.storageUrl)
-        .then((response) => response.json())
-        .then((data) => {
-          console.log(data);
-          storageTempUrl.value = data.url;
-          storageTempFileName.value = data.fileName;
+      console.log("Getting video storage url.");
+      axios
+        .post(props.storageUrl, {
+          public_id: props.publicId,
+          question_id: props.currentQuestion.id,
+          mime_type: mimeType.value,
+        })
+        .then((response) => {
+          // console.log(response.data);
+          storageTempUrl.value = response.data.url;
+          storageTempFileName.value = response.data.fileName;
+        })
+        .catch((err) => {
+          console.log(err);
         });
     };
     /**
@@ -383,9 +165,11 @@ export default {
       uploadPercentage.value = 0;
       onProgress(0);
       axios
-        .put(storageTempUrl.value, formData, {
+        .put(storageTempUrl.value, videoFile.value, {
           headers: {
-            "Content-Type": "multipart/form-data",
+            "Content-Type": mimeType.value.includes("mp4")
+              ? "video/mp4"
+              : "video/webm",
           },
           onUploadProgress: function (progressEvent) {
             // console.log(progressEvent);
@@ -465,6 +249,8 @@ export default {
       uploadFileToS3,
       videoFile,
       setVideoFile,
+      mimeType,
+      getStorageUrl,
     };
   },
 };

@@ -2,7 +2,7 @@
   <div>
     <div class="qt-relative qt-flex qt-justify-center qt-w-full">
       <div
-        v-show="height > 100"
+        v-show="height > 100 && !recorderError"
         :style="{ height: `${280}px` }"
         :class="height > 0 ? 'qt-visible' : 'qt-invisible'"
         class="qt-relative"
@@ -16,19 +16,19 @@
           playsinline
         ></video>
         <div
-          v-if="cameraStarted && !recording"
+          v-if="cameraStarted"
           class="qt-absolute qt-bottom-0 qt-left-0 qt-right-0 qt-z-10 qt-rounded-b-lg qt-flex qt-justify-center qt-items-center qt-bg-black qt-bg-opacity-60"
         >
           <div
             v-if="recStart && !recording"
-            class="qt-absolute qt-bottom-16 qt-animate-pulse qt-bg-black qt-bg-opacity-50 qt-w-12 qt-h-12 qt-rounded-full qt-flex qt-justify-center qt-items-center"
+            class="qt-absolute qt-bottom-16 qt-animate-pulse qt-bg-black qt-bg-opacity-50 qt-w-12 qt-h-16 qt-rounded-full qt-flex qt-justify-center qt-items-center"
           >
             <span class="qt-text-xl qt-font-bold qt-text-white">{{
               countDown
             }}</span>
           </div>
+          <!--v-if="!recording && !videoBlob"-->
           <div
-            v-if="!recording && !videoBlob"
             class="qt-rounded-lg qt-px-3 qt-py-2.5 qt-mx-8 qt-flex qt-justify-center qt-items-center"
           >
             <span class="qt-text-sm qt-font-semibold qt-text-white">
@@ -36,6 +36,24 @@
             >
           </div>
         </div>
+      </div>
+      <div v-show="recorderError" class="qt-max-w-md">
+        <media-error
+          :reloading="false"
+          :contact-msg="false"
+          error-msg="Oops! It looks like your browser does not have permission to use your camera. Please give the browser permission in order to continue."
+          @retry="
+            () => {
+              this.retryAttempts += 1;
+              // this.startRecording();
+              this.recorderError = false;
+            }
+          "
+          :attempts="retryAttempts"
+          :total-attempts="3"
+          link="https://the-english-quiz--2.drift.help/article/how-do-i-enable-my-microphone"
+          show-link
+        />
       </div>
     </div>
     <!--volume bars-->
@@ -56,6 +74,7 @@
       :width="width"
       @start-recording="startRecording"
       @stop-recording="stopRecording"
+      :allow-recording="allowRecording"
     />
   </div>
 </template>
@@ -66,11 +85,17 @@ import { setMicIndicator, unlockAudioContext } from "../../helpers";
 import VideoActionsRtc from "./VideoActionsRtc";
 import VolumeBars from "../audio/helpers/VolumeBars";
 import uniqueId from "lodash/uniqueId";
-let RecordRTC = require("recordrtc");
+import MediaError from "../helpers/MediaError";
+import AudioRecorder from "audio-recorder-polyfill";
+import RecordRTC from "recordrtc";
+
+// let RecordRTC = require("recordrtc");
+// // let RecordRTC = require("recordrtc");
+// let MediaStreamRecorder = require("recordrtc");
 
 export default {
   name: "VideoRecorderRtc",
-  components: { VolumeBars, VideoActionsRtc },
+  components: { MediaError, VolumeBars, VideoActionsRtc },
   props: {
     height: {
       type: Number,
@@ -92,8 +117,19 @@ export default {
       type: String,
       default: "audioQuality_",
     },
+    withMediaRecorder: {
+      type: Boolean,
+      default: false,
+    },
   },
-  emits: ["video-file", "no-audio", "quality", "recording"],
+  emits: [
+    "video-file",
+    "no-audio",
+    "quality",
+    "recording",
+    "mime-type",
+    "get-storage-url",
+  ],
   setup(props, { emit }) {
     props = reactive(props);
     const recording = ref(false);
@@ -118,6 +154,13 @@ export default {
     );
     const countDown = ref(props.currentQuestion.time_to_prepare);
     const recStart = ref(false);
+    const recorderError = ref(false);
+    const allowRecording = ref(false);
+    const retryAttempts = ref(0);
+    const mimeType = ref("video/webm");
+    const mediaRecorder = ref(null);
+    const videoUrl = ref("");
+    const blobsRecorded = ref([]);
 
     /**
      * Watchers
@@ -130,10 +173,32 @@ export default {
     });
     watch(cameraStarted, () => {
       setTimeout(() => {
-        startRecording();
+        // allowRecording.value = true;
+        if (props.withMediaRecorder) {
+          startRecordingWithMediaRecorder();
+        } else {
+          startRecording();
+        }
       }, 200);
     });
     onMounted(() => {
+      if (!window.MediaRecorder) {
+        window.MediaRecorder = AudioRecorder;
+      }
+      if (MediaRecorder.isTypeSupported("video/webm;codecs=h264")) {
+        mimeType.value = "video/webm;codecs=h264";
+      } else if (MediaRecorder.isTypeSupported("video/webm;codecs=vp9")) {
+        mimeType.value = "video/webm;codecs=vp9";
+      } else if (MediaRecorder.isTypeSupported("video/webm;codecs=vp8")) {
+        mimeType.value = "video/webm;codecs=vp8";
+      } else if (MediaRecorder.isTypeSupported("video/webm")) {
+        mimeType.value = "video/webm";
+      } else if (MediaRecorder.isTypeSupported("video/mp4")) {
+        mimeType.value = "video/mp4";
+      }
+      emit("mime-type", mimeType.value);
+      emit("get-storage-url");
+      console.log("mime type: " + mimeType.value);
       startCamera();
       setInitialTime();
     });
@@ -165,6 +230,7 @@ export default {
      */
     const startCamera = () => {
       let video = document.getElementById("qtVideo");
+
       navigator.mediaDevices
         .getUserMedia({
           audio: true,
@@ -206,20 +272,24 @@ export default {
         )
         .then(() => {
           console.log(video.videoWidth + "x" + video.videoHeight);
+          recorderError.value = false;
         })
         .catch((err) => {
           console.log("camera error is :" + err);
+          recorderError.value = true;
         });
     };
 
     const startRecording = () => {
       let video = document.getElementById("qtVideo");
       const options = {
-        mimeType: "video/webm;codecs=vp9", // or video/webm\;codecs=h264 or video/webm\;codecs=vp9
+        mimeType: mimeType.value, // or video/webm\;codecs=h264 or video/webm\;codecs=vp9
         audioBitsPerSecond: 128000,
         videoBitsPerSecond: 128000,
         timeSlice: 2000,
         bitsPerSecond: 128000, // if this line is provided, skip above two
+        type: "video",
+        recorderType: RecordRTC.MediaStreamRecorder,
       };
       video.srcObject = cameraStream.value;
       recordRTC.value = RecordRTC(cameraStream.value, options);
@@ -230,14 +300,20 @@ export default {
       videoBlob.value = null;
 
       setInitialTime();
-      interval.value = setInterval(() => {
+      interval.value = setInterval(async () => {
         if (countDown.value === 1) {
           // start recording with each recorded blob having 1 second video
-          recordRTC.value.startRecording();
-          console.log("recording started");
-          recording.value = true;
-          recStart.value = false;
-          setTimer();
+          try {
+            await recordRTC.value.startRecording();
+            recorderError.value = false;
+            console.log("recording started");
+            recording.value = true;
+            recStart.value = false;
+            setTimer();
+          } catch (e) {
+            console.log(e);
+            recorderError.value = true;
+          }
           clearInterval(interval.value);
         } else {
           countDown.value = countDown.value - 1;
@@ -245,13 +321,21 @@ export default {
       }, 1100);
     };
 
-    const stopRecording = () => {
+    const stopRecording = (blob) => {
+      console.log("recordings stopped");
+      if (props.withMediaRecorder) {
+        if (mediaRecorder.value && mediaRecorder.value.state !== "inactive") {
+          mediaRecorder.value.stop();
+        }
+      } else {
+        console.log(blob);
+        recordRTC.value.stopRecording(processVideo.bind(this));
+        // let stream = cameraStream.value;
+        // stream.getAudioTracks().forEach((track) => track.stop());
+        // stream.getVideoTracks().forEach((track) => track.stop());
+      }
       countDown.value = 3;
       clearInterval(interval2.value);
-      recordRTC.value.stopRecording(processVideo.bind(this));
-      let stream = cameraStream.value;
-      stream.getAudioTracks().forEach((track) => track.stop());
-      stream.getVideoTracks().forEach((track) => track.stop());
     };
 
     const processVideo = (audioVideoWebMURL) => {
@@ -293,6 +377,87 @@ export default {
       width.value = width.value + gap;
     };
 
+    /**
+     * RECORDING WITH MEDIA RECORDER
+     */
+
+    const startRecordingWithMediaRecorder = async () => {
+      if (!window.MediaRecorder) {
+        window.MediaRecorder = AudioRecorder;
+      }
+
+      let mimeType = "video/webm;codecs=vp8";
+      if (MediaRecorder.isTypeSupported("video/webm;codecs=h264,opus")) {
+        mimeType = "video/webm;codecs=h264,opus";
+      } else if (MediaRecorder.isTypeSupported("video/webm;codecs=vp8")) {
+        mimeType = "video/webm;codecs=vp8";
+      } else if (MediaRecorder.isTypeSupported("video/webm;codecs=vp9")) {
+        mimeType = "video/webm;codecs=vp9";
+      } else if (MediaRecorder.isTypeSupported("video/webm")) {
+        mimeType = "video/webm";
+      } else if (MediaRecorder.isTypeSupported("video/mp4")) {
+        mimeType = "video/mp4";
+      }
+      console.log(mimeType);
+      console.log(MediaRecorder.isTypeSupported("video/webm;codecs=h264,opus"));
+      const options = {
+        audioBitsPerSecond: 128000,
+        videoBitsPerSecond: 7000000,
+        mimeType,
+      };
+      mediaRecorder.value = new MediaRecorder(cameraStream.value, options);
+
+      mediaRecorder.value.addEventListener("start", () => {
+        console.log("recording started with media recorder");
+        recording.value = true;
+        recStart.value = false;
+        setTimer();
+      });
+
+      // event : new recorded video blob available
+      mediaRecorder.value.addEventListener("dataavailable", function (e) {
+        blobsRecorded.value.push(e.data);
+      });
+
+      // event : recording stopped & all blobs sent
+      mediaRecorder.value.addEventListener("stop", function () {
+        // create local object URL from the recorded video blobs
+        let videoLocalBlob = new Blob(blobsRecorded.value, {
+          type: mimeType,
+        });
+        let videoLocal = URL.createObjectURL(videoLocalBlob);
+        videoUrl.value = videoLocal;
+
+        videoBlob.value = videoLocal;
+        recording.value = false;
+        const reader = new FileReader();
+        reader.readAsDataURL(videoLocalBlob);
+
+        videoFile.value = new File([videoLocalBlob], "answer_video", {
+          type: videoLocalBlob.type,
+        });
+        // console.log(videoFile.value);
+        // console.log(JSON.stringify(videoFile.value));
+        // console.log(videoLocalBlob.size, videoLocalBlob.size * 0.000001);
+        emit("video-file", videoFile.value);
+      });
+
+      recStart.value = true;
+      width.value = 0;
+      timer.value = "00:00";
+      videoBlob.value = "";
+      setInitialTime();
+      interval.value = setInterval(() => {
+        if (countDown.value === 1) {
+          // start recording with each recorded blob having 1 second video
+          mediaRecorder.value.start(1000);
+          clearInterval(interval.value);
+        } else {
+          countDown.value = countDown.value - 1;
+        }
+      }, 1100);
+    };
+
     return {
       recording,
       cameraStarted,
@@ -305,6 +470,10 @@ export default {
       stopRecording,
       startRecording,
       videoFile,
+      recorderError,
+      retryAttempts,
+      allowRecording,
+      startRecordingWithMediaRecorder,
     };
   },
 };

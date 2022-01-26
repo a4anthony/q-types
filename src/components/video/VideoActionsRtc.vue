@@ -9,8 +9,8 @@
         v-if="!recording"
         :class="`qt-bg-${color}-600 hover:qt-bg-${color}-400 qt-text-white`"
         class="qt-rounded-full qt-w-6 qt-h-6 qt-flex qt-items-center qt-justify-center"
+        :disabled="!allowRecording"
         @click="$emit('start-recording')"
-        disabled
       >
         <VideoCameraIcon class="qt-w-4 qt-h-4" />
       </button>
@@ -44,14 +44,43 @@
       >/ <span>{{ timeLimitString }}</span>
     </div>
   </div>
+  <div
+    v-if="!videoFile && cameraStarted"
+    class="qt-mx-auto qt-my-3 qt-text-center"
+  >
+    <app-button
+      v-if="!recording"
+      class="qt-btn qt-btn-md"
+      :disabled="!allowRecording"
+      @click="$emit('start-recording')"
+      btn-color-class="qt-btn-white"
+    >
+      <span
+        class="qt-block qt-w-3 qt-h-3 qt-mr-2 qt-rounded-full qt-bg-gray-600"
+      ></span>
+      Start Recording
+    </app-button>
+    <app-button
+      v-else
+      btn-color-class="qt-btn-white"
+      class="qt-btn qt-btn-md"
+      @click="$emit('stop-recording')"
+      :disabled="!recording"
+    >
+      <span class="qt-block qt-w-3 qt-h-3 qt-mr-2 qt-bg-gray-600"></span>
+      Stop Recording
+    </app-button>
+  </div>
 </template>
 
 <script>
 import { VideoCameraIcon } from "@heroicons/vue/solid";
+import AppButton from "../helpers/AppButton";
 
 export default {
   name: "VideoActionsRtc",
   components: {
+    AppButton,
     VideoCameraIcon,
   },
   props: {
@@ -78,6 +107,10 @@ export default {
     width: {
       type: Number,
       required: true,
+    },
+    allowRecording: {
+      type: Boolean,
+      required: false,
     },
   },
   emits: ["start-recording", "stop-recording"],
