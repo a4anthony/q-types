@@ -47,6 +47,7 @@ export default {
 
     return {
       height,
+      isOverflown,
     };
   },
 };

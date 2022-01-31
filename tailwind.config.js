@@ -24,6 +24,7 @@ module.exports = {
       patterns: [
         "qt-text-{colors}",
         "qt-bg-{colors}",
+        "qt-ring-{colors}",
         "hover:qt-bg-{colors}",
 
         "qt-border-{colors}",

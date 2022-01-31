@@ -1,81 +1,94 @@
 <template>
-  <div>
-    <div class="qt-relative qt-flex qt-justify-center qt-w-full">
-      <div
-        v-show="height > 100 && !recorderError"
-        :style="{ height: `${280}px` }"
-        :class="height > 0 ? 'qt-visible' : 'qt-invisible'"
-        class="qt-relative"
-      >
-        <video
-          style="height: 100%; object-fit: cover"
-          id="qtVideo"
-          class="qt-rounded-lg"
-          width="400"
-          autoplay
-          playsinline
-        ></video>
+  <div
+    :class="overflow ? 'qt-h-full' : ''"
+    class="qt-flex qt-items-center qt-justify-center"
+  >
+    <div :class="overflow ? 'qt-h-full' : ''">
+      <div class="qt-relative qt-flex qt-justify-center qt-w-full">
         <div
-          v-if="cameraStarted"
-          class="qt-absolute qt-bottom-0 qt-left-0 qt-right-0 qt-z-10 qt-rounded-b-lg qt-flex qt-justify-center qt-items-center qt-bg-black qt-bg-opacity-60"
+          v-show="!recorderError"
+          :style="{ height: `${280}px` }"
+          class="qt-relative"
         >
+          <video
+            style="height: 100%; object-fit: cover"
+            id="qtVideo"
+            class="qt-rounded-lg"
+            width="400"
+            autoplay
+            playsinline
+          ></video>
           <div
-            v-if="recStart && !recording"
-            class="qt-absolute qt-bottom-16 qt-animate-pulse qt-bg-black qt-bg-opacity-50 qt-w-12 qt-h-16 qt-rounded-full qt-flex qt-justify-center qt-items-center"
+            v-if="cameraStarted"
+            class="qt-absolute qt-bottom-0 qt-left-0 qt-right-0 qt-z-10 qt-rounded-b-lg qt-flex qt-justify-center qt-items-center qt-bg-black qt-bg-opacity-60"
           >
-            <span class="qt-text-xl qt-font-bold qt-text-white">{{
-              countDown
-            }}</span>
-          </div>
-          <!--v-if="!recording && !videoBlob"-->
-          <div
-            class="qt-rounded-lg qt-px-3 qt-py-2.5 qt-mx-8 qt-flex qt-justify-center qt-items-center"
-          >
-            <span class="qt-text-sm qt-font-semibold qt-text-white">
-              {{ currentQuestion.content }}</span
+            <div
+              v-if="recStart && !recording"
+              class="qt-absolute qt-bottom-24 qt-animate-pulse qt-bg-black qt-bg-opacity-50 qt-w-12 qt-h-12 qt-rounded-full qt-flex qt-justify-center qt-items-center"
             >
+              <span class="qt-text-xl qt-font-bold qt-text-white">{{
+                countDown
+              }}</span>
+            </div>
+            <!--v-if="!recording && !videoBlob"-->
+            <div
+              class="qt-rounded-lg qt-px-3 qt-py-2.5 qt-mx-8 qt-flex qt-justify-center qt-items-center"
+            >
+              <span class="qt-text-sm qt-font-semibold qt-text-white">
+                {{ currentQuestion.content }}</span
+              >
+            </div>
           </div>
         </div>
+        <div v-show="recorderError" class="qt-max-w-md">
+          <media-error
+            :reloading="false"
+            :contact-msg="false"
+            error-msg="Oops! It looks like your browser does not have permission to use your camera. Please give the browser permission in order to continue."
+            @retry="
+              () => {
+                this.retryAttempts += 1;
+                // this.startRecording();
+                this.recorderError = false;
+              }
+            "
+            :attempts="retryAttempts"
+            :total-attempts="3"
+            link="https://the-english-quiz--2.drift.help/article/how-do-i-enable-my-microphone"
+            show-link
+          />
+        </div>
       </div>
-      <div v-show="recorderError" class="qt-max-w-md">
-        <media-error
-          :reloading="false"
-          :contact-msg="false"
-          error-msg="Oops! It looks like your browser does not have permission to use your camera. Please give the browser permission in order to continue."
-          @retry="
-            () => {
-              this.retryAttempts += 1;
-              // this.startRecording();
-              this.recorderError = false;
-            }
-          "
-          :attempts="retryAttempts"
-          :total-attempts="3"
-          link="https://the-english-quiz--2.drift.help/article/how-do-i-enable-my-microphone"
-          show-link
+      <!--volume bars-->
+      <div v-if="!videoFile && cameraStarted" class="qt-mt-2">
+        <volume-bars
+          :unique-string="uniqueString"
+          :unique-key="uniqueKey"
+          classes="qt-mb-2"
         />
       </div>
-    </div>
-    <!--volume bars-->
-    <div v-if="!videoFile && cameraStarted" class="qt-mt-4">
-      <volume-bars
-        :unique-string="uniqueString"
-        :unique-key="uniqueKey"
-        class="qt-mb-4"
+      <!--video recorder actions-->
+      <video-actions-rtc
+        :recording="recording"
+        :video-file="videoFile"
+        :timer="timer"
+        :time-limit-string="timeLimitString"
+        :camera-started="cameraStarted"
+        :width="width"
+        @start-recording="startRecording"
+        @stop-recording="stopRecording"
+        :allow-recording="allowRecording"
       />
+      <!--video upload-->
+      <video-upload
+        v-if="videoFile"
+        :file-size="fileSize"
+        :upload-success="uploadSuccess"
+        :upload-error="uploadError"
+        @retry-upload="$emit('upload-s3')"
+      />
+      <settings ref="settingsRef" @overflow="setOverflow" />
     </div>
-    <!--video recorder actions-->
-    <video-actions-rtc
-      :recording="recording"
-      :video-file="videoFile"
-      :timer="timer"
-      :time-limit-string="timeLimitString"
-      :camera-started="cameraStarted"
-      :width="width"
-      @start-recording="startRecording"
-      @stop-recording="stopRecording"
-      :allow-recording="allowRecording"
-    />
   </div>
 </template>
 
@@ -88,6 +101,8 @@ import uniqueId from "lodash/uniqueId";
 import MediaError from "../helpers/MediaError";
 import AudioRecorder from "audio-recorder-polyfill";
 import RecordRTC from "recordrtc";
+import VideoUpload from "./VideoUpload";
+import Settings from "../helpers/Settings";
 
 // let RecordRTC = require("recordrtc");
 // // let RecordRTC = require("recordrtc");
@@ -95,8 +110,26 @@ import RecordRTC from "recordrtc";
 
 export default {
   name: "VideoRecorderRtc",
-  components: { MediaError, VolumeBars, VideoActionsRtc },
+  components: {
+    Settings,
+    VideoUpload,
+    MediaError,
+    VolumeBars,
+    VideoActionsRtc,
+  },
   props: {
+    fileSize: {
+      type: String,
+      default: "",
+    },
+    uploadSuccess: {
+      type: Boolean,
+      default: false,
+    },
+    uploadError: {
+      type: Boolean,
+      default: false,
+    },
     height: {
       type: Number,
       default: 200,
@@ -129,6 +162,7 @@ export default {
     "recording",
     "mime-type",
     "get-storage-url",
+    "upload-s3",
   ],
   setup(props, { emit }) {
     props = reactive(props);
@@ -161,6 +195,8 @@ export default {
     const mediaRecorder = ref(null);
     const videoUrl = ref("");
     const blobsRecorded = ref([]);
+    const settingsRef = ref(null);
+    const overflow = ref(false);
 
     /**
      * Watchers
@@ -173,6 +209,8 @@ export default {
     });
     watch(cameraStarted, () => {
       setTimeout(() => {
+        console.log(settingsRef.value.isOverflown());
+        overflow.value = settingsRef.value.isOverflown();
         // allowRecording.value = true;
         if (props.withMediaRecorder) {
           startRecordingWithMediaRecorder();
@@ -189,6 +227,8 @@ export default {
         mimeType.value = "video/webm;codecs=h264";
       } else if (MediaRecorder.isTypeSupported("video/webm;codecs=vp9")) {
         mimeType.value = "video/webm;codecs=vp9";
+      } else if (MediaRecorder.isTypeSupported("video/webm;codec=opus,vp8")) {
+        mimeType.value = "video/webm;codec=opus,vp8";
       } else if (MediaRecorder.isTypeSupported("video/webm;codecs=vp8")) {
         mimeType.value = "video/webm;codecs=vp8";
       } else if (MediaRecorder.isTypeSupported("video/webm")) {
@@ -198,7 +238,7 @@ export default {
       }
       emit("mime-type", mimeType.value);
       emit("get-storage-url");
-      console.log("mime type: " + mimeType.value);
+      console.log("setting mime type: " + mimeType.value);
       startCamera();
       setInitialTime();
     });
@@ -235,10 +275,10 @@ export default {
         .getUserMedia({
           audio: true,
           video: {
-            width: { min: 320 / 2, ideal: 320 / 2 },
-            height: { min: 240 / 2, ideal: 240 / 2 },
-            aspectRatio: 3 / 2,
-            frameRate: { exact: 10 },
+            // width: { min: 320 / 2, ideal: 320 / 2 },
+            // height: { min: 240 / 2, ideal: 240 / 2 },
+            // aspectRatio: 3 / 2,
+            // frameRate: { exact: 10 },
             facingMode: "user",
           },
         })
@@ -458,6 +498,14 @@ export default {
       }, 1100);
     };
 
+    /**
+     * Set overflow
+     * @param val
+     */
+    const setOverflow = (val) => {
+      overflow.value = val;
+    };
+
     return {
       recording,
       cameraStarted,
@@ -474,6 +522,9 @@ export default {
       retryAttempts,
       allowRecording,
       startRecordingWithMediaRecorder,
+      settingsRef,
+      overflow,
+      setOverflow,
     };
   },
 };

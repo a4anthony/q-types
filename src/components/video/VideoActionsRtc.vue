@@ -2,7 +2,7 @@
   <div
     v-if="!videoFile && cameraStarted"
     :class="`qt-border-${color}-600`"
-    class="qt-mt-0 qt-w-full qt-mx-auto qt-max-w-sm qt-border-2 qt-rounded-3xl qt-px-2 qt-py-1.5 qt-flex qt-justify-center qt-space-x-2 qt-items-center"
+    class="qt-mt-0 qt-w-full qt-mx-auto qt-max-w-sm qt-border-2 qt-rounded-3xl qt-px-1.5 qt-py-1 qt-flex qt-justify-center qt-space-x-2 qt-items-center"
   >
     <div>
       <button
@@ -46,7 +46,7 @@
   </div>
   <div
     v-if="!videoFile && cameraStarted"
-    class="qt-mx-auto qt-my-3 qt-text-center"
+    class="qt-mx-auto qt-py-2 qt-text-center"
   >
     <app-button
       v-if="!recording"

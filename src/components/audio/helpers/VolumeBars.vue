@@ -1,6 +1,7 @@
 <template>
   <div
-    class="qt-w-1/2 qt-mx-auto qt-relative qt-h-2 qt-mb-5"
+    :class="classes"
+    class="qt-w-1/2 qt-mx-auto qt-relative qt-h-2"
     style="width: 205px"
   >
     <div
@@ -34,6 +35,10 @@ export default {
     uniqueString: {
       type: String,
       default: "",
+    },
+    classes: {
+      type: String,
+      default: "qt-mb-5",
     },
   },
 };

@@ -23,14 +23,18 @@
         }
       "
       @get-storage-url="getStorageUrl"
-    />
-    <video-upload
-      v-if="videoFile"
-      :file-size="fileSize"
-      :upload-success="uploadSuccess"
       :upload-error="uploadError"
-      @retry-upload="uploadFileToS3"
+      :upload-success="uploadSuccess"
+      :file-size="fileSize"
+      @upload-s3="uploadFileToS3"
     />
+    <!--<video-upload-->
+    <!--  v-if="videoFile"-->
+    <!--  :file-size="fileSize"-->
+    <!--  :upload-success="uploadSuccess"-->
+    <!--  :upload-error="uploadError"-->
+    <!--  @retry-upload="uploadFileToS3"-->
+    <!--/>-->
     <settings @height="useHeight" />
   </div>
 </template>
@@ -43,12 +47,10 @@ import Settings from "../../helpers/Settings";
 import uniqueId from "lodash/uniqueId";
 import axios from "axios";
 import VideoRecorderRtc from "../../video/VideoRecorderRtc";
-import VideoUpload from "../../video/VideoUpload";
 
 export default {
   name: "VideoQuestion",
   components: {
-    VideoUpload,
     VideoRecorderRtc,
     Settings,
   },
@@ -123,6 +125,7 @@ export default {
           100 -
           100;
       }
+      console.log("video height should be: ", height.value);
     };
     /**
      * Get storage url
@@ -225,6 +228,7 @@ export default {
         }
       }
     };
+
     return {
       useHeight,
       height,
