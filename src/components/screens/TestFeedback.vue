@@ -1,15 +1,17 @@
 <template>
   <div class="qt-h-full qt-flex qt-w-full qt-justify-center qt-items-center">
-    <div class="qt-space-y-3 qt-text-center qt-w-full sm:qt-w-2/3">
+    <div class="qt-space-y-3 qt-text-center qt-w-full sm:qt-w-4/5">
       <span class="qt-block qt-font-bold qt-text-2xl">Test Completed</span>
       <!--<span class="qt-block qt-text-base qt-font-semibold">Thank you!</span>-->
       <div class="qt-mt-4" v-if="!hasFeedback">
         <div class="qt-space-y-5">
-          <!--<span-->
-          <!--  class="qt-block qt-text-sm qt-text-gray-500 qt-font-semibold qt-text-center"-->
-          <!--  >How would you rate your experience?</span-->
-          <!--&gt;-->
-          <div class="qt-grid qt-grid-cols-5 sm:qt-grid-cols-5 qt-gap-4">
+          <span
+            class="qt-block qt-text-sm qt-text-gray-500 qt-font-semibold qt-text-center"
+            >How would you rate your experience?</span
+          >
+          <div
+            class="qt-grid qt-grid-cols-5 sm:qt-grid-cols-5 qt-gap-4 qt-w-full sm:qt-w-1/2 qt-mx-auto"
+          >
             <span
               v-for="(impression, index) in impressions"
               :key="`impression${index}`"
@@ -33,7 +35,6 @@
                   <fa-icon :icon="impression.icon.icon" />
                 </span>
               </button>
-
               <!--<span class="block text-sm" v-html="impression.label"></span>-->
             </span>
           </div>
@@ -45,23 +46,31 @@
             >
               Answer
             </label>
-            <div>
+            <div class="qt-relative">
               <textarea
                 id="feedback"
                 name="feedback"
                 rows="6"
                 v-model="feedback"
-                :class="`focus:qt-ring-${color}-500 focus:qt-border-${color}-500`"
+                :class="[
+                  `focus:qt-ring-${color}-500 focus:qt-border-${color}-500`,
+                  `qt-ring--- qt-ring-amber-500--- `,
+                ]"
                 class="qt-p-2 qt-shadow-sm qt-mt-1 qt-block qt-w-full sm:qt-text-sm qt-border qt-border-gray-300 qt-rounded-md"
-                placeholder="How did you fare?"
+                placeholder="Enter your feedback here"
               ></textarea>
+              <span
+                v-if="hasIssues && !feedback"
+                class="qt-absolute qt-left-0 qt--bottom-5 qt-text-red-400 qt-text-sm"
+                >Nice message to prompt feedback</span
+              >
             </div>
           </div>
           <!--issues checkbox-->
           <div class="qt-flex qt-items-center qt-justify-start">
             <button
               @click="hasIssues = !hasIssues"
-              class="qt-flex qt-items-center focus:qt-outline-none"
+              class="qt-flex qt-items-center focus:qt-outline-none qt-mt-2"
             >
               <input
                 id="issues"
@@ -69,7 +78,7 @@
                 type="checkbox"
                 v-model="hasIssues"
                 :class="`qt-text-${color}-600 focus:qt-ring-${color}-500`"
-                class="qt-h-5 qt-w-5 qt-border-gray-300 qt-rounded-full qt-cursor-pointer"
+                class="qt-h-4 qt-w-4 qt-border-gray-300 qt-rounded-full qt-cursor-pointer"
               />
               <label
                 for="issues"
@@ -78,39 +87,19 @@
                 Did you encounter any technical issue(s)?
               </label>
               <span
-                class="qt-ml-2 qt-text-base qt-font-semibold qt-text-left qt-text-gray-600"
+                class="qt-ml-2 qt-text-sm qt-font-medium qt-text-left qt-text-gray-500"
               >
-                Did you encounter any technical issue(s)?
+                Is your feedback related to any technical issue(s)?
               </span>
-            </button>
-          </div>
-          <!--issues list-->
-          <div
-            v-if="hasIssues"
-            class="qt-flex qt-justify-center sm:qt-justify-start qt-flex-wrap"
-          >
-            <button
-              v-for="(issue, index) in issues"
-              :key="`issue${index}`"
-              @click="setIssue(issue)"
-              class="hover:qt-bg-gray-100 qt-text-sm focus:qt-outline-none qt-border qt-rounded-md qt-px-2 qt-py-1 qt-inline-flex qt-items-center qt-justify-between qt-mr-2 qt-mb-2"
-            >
-              <CheckCircleIcon
-                v-if="issue.status"
-                class="qt-w-4 qt-h-4 qt-mr-1 qt-text-blue-500"
-              />
-              <CheckCircleIcon
-                v-else
-                class="qt-w-4 qt-h-4 qt-text-gray-300 qt-font-bold qt-mr-1"
-              />
-              {{ issue.label }}
             </button>
           </div>
           <!--submit-->
           <div>
             <div class="qt-flex qt-justify-end qt-mt-3">
               <app-button
-                :disabled="!selectedImpression || loading"
+                :disabled="
+                  !selectedImpression || loading || (!feedback && hasIssues)
+                "
                 @click="submitFeedback"
                 class="qt-btn-lg"
               >
@@ -126,54 +115,11 @@
 
 <script>
 import AppButton from "../helpers/AppButton";
-import { CheckCircleIcon } from "@heroicons/vue/solid";
 import { ref } from "vue";
-const impressions = [
-  {
-    id: 1,
-    label: "Definitely didn't<br/> like it",
-    icon: {
-      class: "qt-text-red-400",
-      icon: ["far", "frown"],
-    },
-  },
-  {
-    id: 2,
-    label: "Not my<br/> favourite",
-    icon: {
-      class: "qt-text-yellow-500",
-      icon: ["far", "frown-open"],
-    },
-  },
-  {
-    id: 3,
-    label: "It was ok",
-    icon: {
-      class: "qt-text-yellow-300",
-      icon: ["far", "meh"],
-    },
-  },
-  {
-    id: 4,
-    label: "Liked it",
-    icon: {
-      class: "qt-text-green-400",
-      icon: ["far", "smile"],
-    },
-  },
-  {
-    id: 5,
-    label: "Loved it",
-    icon: {
-      class: "qt-text-green-500",
-      icon: ["far", "grin-beam"],
-    },
-  },
-];
 
 export default {
   name: "TestFeedback",
-  components: { AppButton, CheckCircleIcon },
+  components: { AppButton },
   props: {
     loading: {
       type: Boolean,
@@ -184,68 +130,80 @@ export default {
       default: false,
     },
   },
-
-  setup() {
+  emits: ["form"],
+  setup(_, { emit }) {
     const selectedImpression = ref(null);
     const feedback = ref("");
-    const hasIssues = ref(true);
+    const hasIssues = ref(false);
+    const impressions = ref([
+      {
+        id: 1,
+        label: "Definitely didn't<br/> like it",
+        icon: {
+          class: "qt-text-red-400",
+          icon: ["far", "frown"],
+        },
+      },
+      {
+        id: 2,
+        label: "Not my<br/> favourite",
+        icon: {
+          class: "qt-text-yellow-500",
+          icon: ["far", "frown-open"],
+        },
+      },
+      {
+        id: 3,
+        label: "It was ok",
+        icon: {
+          class: "qt-text-yellow-300",
+          icon: ["far", "meh"],
+        },
+      },
+      {
+        id: 4,
+        label: "Liked it",
+        icon: {
+          class: "qt-text-green-400",
+          icon: ["far", "smile"],
+        },
+      },
+      {
+        id: 5,
+        label: "Loved it",
+        icon: {
+          class: "qt-text-green-500",
+          icon: ["far", "grin-beam"],
+        },
+      },
+    ]);
     const issues = ref([
       {
         status: true,
-        label: "Issue 1",
+        label: "Media issue",
       },
       {
         status: true,
-        label: "Issue 2",
+        label: "Skipped question",
       },
       {
         status: false,
-        label: "Issue 3",
-      },
-      {
-        status: true,
-        label: "Issue 4",
-      },
-      {
-        status: false,
-        label: "Issue 5",
-      },
-      {
-        status: true,
-        label: "Issue 6",
-      },
-      {
-        status: true,
-        label: "Issue 7",
-      },
-      {
-        status: false,
-        label: "Issue 8",
-      },
-      {
-        status: false,
-        label: "Issue 9",
+        label: "Connection issue",
       },
     ]);
     const onHoverIn = (elm) => {
       elm.icon.icon[0] = "fas";
-      // elm.icon.icon[1] = elm.icon.icon[1] + "-solid";
-      // alert(JSON.stringify(elm));
     };
     const onHoverOut = (elm) => {
       if (elm.id !== selectedImpression.value) {
         elm.icon.icon[0] = "far";
       }
-      // elm.icon.icon[1] = elm.icon.icon[1].replace("-solid", "");
-      // alert(JSON.stringify(elm));
     };
     const setImpression = (elm) => {
       selectedImpression.value = elm.id;
-      console.log(elm);
       elm.icon.icon[0] = "fas";
-      impressions.forEach((impression) => {
+      impressions.value.forEach((impression) => {
         if (impression.id !== elm.id) {
-          console.log(impression.icon.icon[1]);
           impression.icon.icon[0] = "far";
         }
       });
@@ -256,19 +214,11 @@ export default {
     };
 
     const submitFeedback = () => {
-      let formData = new FormData();
-      formData.append("impression", selectedImpression.value - 1);
-      formData.append("comment", feedback.value);
-      // this.$store.commit("settings/setPageLoader", true);
-      // this.$store
-      //     .dispatch("teq/feedback", formData)
-      //     .then(() => {
-      //       this.$store.commit("teq/setHasFeedback", true);
-      //       this.$store.commit("settings/setPageLoader", false);
-      //     })
-      //     .catch((err) => {
-      //       this.$store.commit("settings/setPageLoader", false);
-      //     });
+      emit("form", {
+        impression: selectedImpression.value - 1,
+        comment: feedback.value,
+        with_technical_issues: hasIssues.value,
+      });
     };
 
     return {

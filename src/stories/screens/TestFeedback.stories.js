@@ -28,17 +28,16 @@ const Template = (args) => ({
     return { args };
   },
   methods: {
-    answered: action("answered"),
-    startTime: action("start-time"),
-    resetAnswer: action("reset-answer"),
-    loadError: action("load-error"),
+    form: action("form"),
   },
   // And then the `args` are bound to your component with `v-bind="args"`
   template:
     "<default-audio :src='args.currentQuestion.media' view='question'/>" +
     "<question-wrapper :no-slots='true'>" +
     "<test-feedback  " +
-    'v-bind="args"  />' +
+    'v-bind="args" ' +
+    '@form="form" ' +
+    "  />" +
     "</question-wrapper>",
 });
 
